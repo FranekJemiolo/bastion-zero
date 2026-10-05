@@ -18,6 +18,7 @@ kotlin {
         target.binaries.framework {
             baseName = "Shared"
             isStatic = true
+            linkerOpts("-lsqlite3")
         }
     }
 

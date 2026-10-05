@@ -28,7 +28,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.bastionzero.ios
         FRAMEWORK_SEARCH_PATHS: "$(SRCROOT)/../shared/build/xcode-frameworks/$(CONFIGURATION)/$(SDK_NAME)"
-        OTHER_LDFLAGS: "$(inherited) -framework Shared"
+        OTHER_LDFLAGS: "$(inherited) -framework Shared -lsqlite3"
     preBuildScripts:
       - name: Build Kotlin shared framework
         basedOnDependencyAnalysis: false
