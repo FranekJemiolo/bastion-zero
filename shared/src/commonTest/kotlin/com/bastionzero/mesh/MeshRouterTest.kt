@@ -9,6 +9,7 @@ import com.bastionzero.power.PowerGovernor
 import com.bastionzero.power.PowerInputs
 import com.bastionzero.proto.SurvivalPacket
 import com.bastionzero.testing.FakeEd25519
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -19,11 +20,12 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 
 class FakeMeshTransport : MeshTransport {
     val broadcasted = mutableListOf<SurvivalPacket>()
-    private val _incoming = MutableSharedFlow<SurvivalPacket>(extraBufferCapacity = 64)
+    private val _incoming = MutableSharedFlow<SurvivalPacket>(replay = 16, extraBufferCapacity = 64)
     override val incomingPackets: SharedFlow<SurvivalPacket> = _incoming
 
     override val peerCount = MutableStateFlow(1)
@@ -56,20 +58,38 @@ class FakePowerBackend : PowerBackend {
 }
 
 class MeshRouterTest {
-    private val ed = FakeEd25519()
-    private val senderKeys = ed.generateKeyPair()
-    private val remoteKeys = ed.generateKeyPair()
+    private lateinit var ed: FakeEd25519
+    private lateinit var senderKeys: Ed25519KeyPair
+    private lateinit var remoteKeys: Ed25519KeyPair
 
-    private val localClock = LamportClock()
-    private val remoteClock = LamportClock()
+    private lateinit var localClock: LamportClock
+    private lateinit var remoteClock: LamportClock
 
-    private val localSigner = PacketSigner(senderKeys, localClock, ed)
-    private val remoteSigner = PacketSigner(remoteKeys, remoteClock, ed)
+    private lateinit var localSigner: PacketSigner
+    private lateinit var remoteSigner: PacketSigner
 
-    private val validator = PacketValidator(ed, ReplayGuard(), localClock)
-    private val pinStore = MapPinStore("local_node", localClock)
-    private val haptics = FakeHapticPlayer()
-    private val transport = FakeMeshTransport()
+    private lateinit var validator: PacketValidator
+    private lateinit var pinStore: MapPinStore
+    private lateinit var haptics: FakeHapticPlayer
+    private lateinit var transport: FakeMeshTransport
+
+    @BeforeTest
+    fun setUp() {
+        ed = FakeEd25519()
+        senderKeys = ed.generateKeyPair()
+        remoteKeys = ed.generateKeyPair()
+
+        localClock = LamportClock()
+        remoteClock = LamportClock()
+
+        localSigner = PacketSigner(senderKeys, localClock, ed)
+        remoteSigner = PacketSigner(remoteKeys, remoteClock, ed)
+
+        validator = PacketValidator(ed, ReplayGuard(), localClock)
+        pinStore = MapPinStore("local_node", localClock)
+        haptics = FakeHapticPlayer()
+        transport = FakeMeshTransport()
+    }
 
     private fun createRouter(scope: CoroutineScope): MeshRouter {
         val gov = PowerGovernor(FakePowerBackend(), scope)
@@ -88,13 +108,14 @@ class MeshRouterTest {
     @Test
     fun floodRoutesValidPacketWithDecrementedTtl() = runTest {
         val router = createRouter(backgroundScope)
+        runCurrent()
         val packet = remoteSigner.create(
             type = SurvivalPacket.PacketType.PING,
             ttl = 5,
         )
 
         transport.simulateIncoming(packet)
-        testScheduler.advanceUntilIdle()
+        advanceUntilIdle()
 
         assertEquals(1, transport.broadcasted.size)
         val forwarded = transport.broadcasted.first()
@@ -106,13 +127,14 @@ class MeshRouterTest {
     @Test
     fun haltsFloodWhenTtlIsOne() = runTest {
         val router = createRouter(backgroundScope)
+        runCurrent()
         val packet = remoteSigner.create(
             type = SurvivalPacket.PacketType.PING,
             ttl = 1,
         )
 
         transport.simulateIncoming(packet)
-        testScheduler.advanceUntilIdle()
+        advanceUntilIdle()
 
         assertEquals(0, transport.broadcasted.size)
     }
@@ -120,31 +142,33 @@ class MeshRouterTest {
     @Test
     fun dropsReplayedPacketsWithoutForwarding() = runTest {
         val router = createRouter(backgroundScope)
+        runCurrent()
         val packet = remoteSigner.create(
             type = SurvivalPacket.PacketType.PING,
             ttl = 4,
         )
 
         transport.simulateIncoming(packet)
-        testScheduler.advanceUntilIdle()
+        advanceUntilIdle()
         assertEquals(1, transport.broadcasted.size)
 
         // Simulate duplicate arrival
         transport.simulateIncoming(packet)
-        testScheduler.advanceUntilIdle()
+        advanceUntilIdle()
         assertEquals(1, transport.broadcasted.size) // No second broadcast
     }
 
     @Test
     fun incomingSosTriggersHapticAlarm() = runTest {
         val router = createRouter(backgroundScope)
+        runCurrent()
         val sos = remoteSigner.create(
             type = SurvivalPacket.PacketType.SOS_MEDICAL,
             ttl = 3,
         )
 
         transport.simulateIncoming(sos)
-        testScheduler.advanceUntilIdle()
+        advanceUntilIdle()
 
         assertTrue(haptics.played.contains(HapticChord.MEDICAL_SOS))
     }
