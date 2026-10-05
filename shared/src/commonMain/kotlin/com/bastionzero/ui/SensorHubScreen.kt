@@ -33,7 +33,14 @@ import com.bastionzero.hal.ThreatSignature
 import com.bastionzero.hal.TiltSeverity
 import com.bastionzero.haptics.HapticChord
 import com.bastionzero.haptics.HapticPlayer
+import com.bastionzero.hub.RadiationHazardLevel
+import com.bastionzero.hub.TacticalHubBridge
 import com.bastionzero.power.PowerGovernor
+import com.bastionzero.thermal.SurfaceMaterial
+import com.bastionzero.thermal.ThermalImagingEngine
+import com.bastionzero.thermal.ThermalReading
+import com.bastionzero.trauma.KinematicTraumaLogger
+import com.bastionzero.trauma.TraumaSeverity
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -50,6 +57,9 @@ fun SensorHubScreen(
         deadMansSwitch = env.deadMansSwitch,
         acousticEdgeAI = env.acousticEdgeAI,
         gnssSpoofing = env.gnssSpoofing,
+        traumaLogger = env.traumaLogger,
+        thermalEngine = env.thermalEngine,
+        tacticalHub = env.tacticalHub,
         modifier = modifier,
     )
 }
@@ -77,6 +87,9 @@ fun SensorHubContent(
     deadMansSwitch: com.bastionzero.hal.DeadMansSwitch = remember { com.bastionzero.hal.DeadMansSwitch() },
     acousticEdgeAI: com.bastionzero.hal.AcousticEdgeAI = remember { com.bastionzero.hal.AcousticEdgeAI() },
     gnssSpoofing: com.bastionzero.hal.GnssSpoofingDetector = remember { com.bastionzero.hal.GnssSpoofingDetector() },
+    traumaLogger: com.bastionzero.trauma.KinematicTraumaLogger = remember { com.bastionzero.trauma.KinematicTraumaLogger() },
+    thermalEngine: com.bastionzero.thermal.ThermalImagingEngine = remember { com.bastionzero.thermal.ThermalImagingEngine() },
+    tacticalHub: com.bastionzero.hub.TacticalHubBridge = remember { com.bastionzero.hub.TacticalHubBridge() },
     modifier: Modifier = Modifier,
 ) {
     val inputs by power.inputs.collectAsState()
@@ -87,6 +100,13 @@ fun SensorHubContent(
     val dmsState by deadMansSwitch.state.collectAsState()
     val gnssReport by gnssSpoofing.integrityReport.collectAsState()
     val currentSpl by acousticEdgeAI.currentSpl.collectAsState()
+    val traumaState by traumaLogger.state.collectAsState()
+    val hubState by tacticalHub.state.collectAsState()
+
+    var selectedThermalMaterial by remember { mutableStateOf(SurfaceMaterial.HUMAN_SKIN) }
+    var currentThermalReading by remember {
+        mutableStateOf(thermalEngine.calculateTrueTemperature(36.5f, SurfaceMaterial.HUMAN_SKIN))
+    }
 
     var latestThreat by remember { mutableStateOf<AcousticThreatEvent?>(null) }
     val scope = rememberCoroutineScope()
@@ -262,6 +282,126 @@ fun SensorHubContent(
                 ) { Text(chord.name.replace('_', ' '), color = BastionColors.Red) }
             }
             Text("Hardware PWM Waveform for zero-light tactile signaling.", color = BastionColors.DimRed)
+        }
+
+        // 8. Kinematic Trauma Black-Box
+        CardBox(title = "KINEMATIC TRAUMA BLACK-BOX (HIGH-G & FALL)") {
+            val severityColor = when (traumaState.activeSeverity) {
+                TraumaSeverity.CATASTROPHIC, TraumaSeverity.SEVERE_TRAUMA -> BastionColors.Red
+                TraumaSeverity.MODERATE_IMPACT -> BastionColors.Ember
+                TraumaSeverity.NORMAL -> BastionColors.DimRed
+            }
+            Text("Status: ${traumaState.activeSeverity}", color = severityColor, style = MaterialTheme.typography.titleMedium)
+            Text("Live Acceleration: ${traumaState.currentAccelerationG.formatDecimals(1)} G · Peak: ${traumaState.peakRecordedG.formatDecimals(1)} G")
+            Text("Free-Fall State: ${if (traumaState.isInFreeFall) "FALLING (< 0.25G)" else "GROUNDED / NORMAL"}")
+            Text("RAM Buffer: ${traumaState.circularBufferCount} telemetry frames held in memory")
+
+            val event = traumaState.lastTraumaEvent
+            if (event != null) {
+                Text("Lock-Screen Triage Alert:", color = BastionColors.Red, style = MaterialTheme.typography.titleSmall)
+                Text(event.lockScreenTriageAlert, color = BastionColors.Red)
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = {
+                        // Simulate 1.0s freefall followed by 14.5G impact
+                        val t0 = 1_000_000_000L
+                        traumaLogger.processSample(t0, 0.05f, 0.05f, 0.05f)
+                        traumaLogger.processSample(t0 + 1_000_000_000L, 2f, 2f, 14.5f, gxDegPerSec = 360f)
+                    }
+                ) { Text("SIMULATE 14G FALL", color = BastionColors.Red) }
+
+                OutlinedButton(
+                    onClick = { traumaLogger.reset() }
+                ) { Text("RESET BLACK-BOX", color = BastionColors.DimRed) }
+            }
+        }
+
+        // 9. LWIR Thermal & Emissivity Engine
+        CardBox(title = "LWIR THERMAL & EMISSIVITY CORRECTION") {
+            Text("Target Material: ${selectedThermalMaterial.displayName} (ε = ${selectedThermalMaterial.emissivity})")
+            Text("Apparent Temp: ${currentThermalReading.apparentTempCelsius.formatDecimals(1)}°C · Corrected: ${currentThermalReading.correctedTempCelsius.formatDecimals(1)}°C",
+                color = if (currentThermalReading.isScaldHazard) BastionColors.Red else BastionColors.DimRed)
+
+            val warning = currentThermalReading.safetyWarning
+            if (warning != null) {
+                Text("⚠️ $warning", color = BastionColors.Red)
+            }
+            val action = currentThermalReading.recommendedFieldAction
+            if (action != null) {
+                Text("Action: $action", color = BastionColors.Ember)
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                OutlinedButton(
+                    onClick = {
+                        selectedThermalMaterial = SurfaceMaterial.HUMAN_SKIN
+                        currentThermalReading = thermalEngine.calculateTrueTemperature(36.5f, SurfaceMaterial.HUMAN_SKIN)
+                    }
+                ) { Text("SKIN", color = BastionColors.Red) }
+
+                OutlinedButton(
+                    onClick = {
+                        selectedThermalMaterial = SurfaceMaterial.POLISHED_METAL
+                        currentThermalReading = thermalEngine.calculateTrueTemperature(22.0f, SurfaceMaterial.POLISHED_METAL)
+                    }
+                ) { Text("SHINY METAL", color = BastionColors.Ember) }
+
+                OutlinedButton(
+                    onClick = {
+                        selectedThermalMaterial = SurfaceMaterial.MYLAR_SPACE_BLANKET
+                        currentThermalReading = thermalEngine.calculateTrueTemperature(5.0f, SurfaceMaterial.MYLAR_SPACE_BLANKET)
+                    }
+                ) { Text("MYLAR", color = BastionColors.Red) }
+
+                OutlinedButton(
+                    onClick = {
+                        selectedThermalMaterial = SurfaceMaterial.TARGET_PATCH_TAPE_SOOT
+                        currentThermalReading = thermalEngine.calculateTrueTemperature(85.0f, SurfaceMaterial.TARGET_PATCH_TAPE_SOOT)
+                    }
+                ) { Text("PATCH", color = BastionColors.DimRed) }
+            }
+        }
+
+        // 10. Tactical Hub & LoRa Bridge
+        CardBox(title = "TACTICAL HUB (LORA MESH & CBRN DOSIMETER)") {
+            Text("LoRa Link: ${if (hubState.isLoRaConnected) "ACTIVE (${hubState.loraFrequencyMhz} MHz)" else "DISCONNECTED"}",
+                color = if (hubState.isLoRaConnected) BastionColors.Red else BastionColors.DimRed)
+            Text("LoRa Packets: TX ${hubState.packetsTransmittedLoRa} · RX ${hubState.packetsReceivedLoRa}")
+
+            val rad = hubState.lastRadiationTelemetry
+            if (rad != null) {
+                val radColor = if (rad.isExclusionZoneTriggered) BastionColors.Red else BastionColors.DimRed
+                Text("Radiation Rate: ${rad.currentDoseRateMicroSvPerHour.formatDecimals(2)} μSv/h (${rad.hazardLevel})", color = radColor)
+                Text("Accumulated Dose: ${rad.accumulatedDoseMicroSv.formatDecimals(1)} μSv · Safe Stay Time: ${rad.safeStayTimeHoursRemaining.formatDecimals(1)} hrs")
+                if (rad.isExclusionZoneTriggered) {
+                    Text("☢️ ACUTE RADIATION EXCLUSION ZONE TRIGGERED", color = BastionColors.Red)
+                }
+            } else {
+                Text("Dosimeter Status: SENSOR STANDBY", color = BastionColors.DimRed)
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = {
+                        tacticalHub.setLoRaConnected(true, 915.0f)
+                        val samplePacket = "BASTION_MESH_PING_SOS".encodeToByteArray()
+                        val frame = tacticalHub.frameLoRaPacket(samplePacket)
+                        tacticalHub.unframeLoRaPacket(frame)
+                    }
+                ) { Text("TEST LORA FRAME", color = BastionColors.Red) }
+
+                OutlinedButton(
+                    onClick = {
+                        tacticalHub.processRadiationSample(125.0f, 1_000_000_000L)
+                    }
+                ) { Text("SIMULATE 125 μSv/h", color = BastionColors.Red) }
+
+                OutlinedButton(
+                    onClick = { tacticalHub.resetDose() }
+                ) { Text("RESET DOSE", color = BastionColors.DimRed) }
+            }
         }
     }
 }

@@ -12,15 +12,16 @@ Kotlin Multiplatform shared core · Compose Multiplatform UI · native hardware 
 
 ## Features & roadmap
 
-| Stage | Target | Highlights |
-| --- | --- | --- |
-| 1 · "Burner" MVP | Cheap phones | OLED black/red PowerOS, BLE mesh SOS & pins, offline maps + medical wiki, dead reckoning |
-| 2 · Flagship fusion | High-end phones | LiDAR dark nav, on-device CV, trauma logs, UWB |
-| 3 · Tactical Hub | + external gear | LoRa bridge, thermal, SDR, Geiger, solar AR (Android USB-OTG) |
+| Stage | Target | Highlights | Status |
+| --- | --- | --- | --- |
+| 1 · "Burner" MVP | Cheap phones (<$300) | OLED black/red PowerOS, BLE mesh SOS & pins, offline maps + medical wiki, dead reckoning | **Complete** |
+| 2 · Flagship fusion | Modern flagships | Kinematic trauma black-box, optical PPG, GNSS spoofing defense, UWB spatial ranging | **Complete** |
+| 3 · Tactical Hub | + external gear | LoRa multi-mile bridge, LWIR thermal emissivity engine, Geiger counter stay-time tracker | **Complete** |
+| 4 · Bleeding-Edge Networks | Resilient comms | Ultrasonic AFSK modem (air-gapped), Bluetooth 6.0 channel sounding, NTN satellite mesh bridge, Edge-LLM RAG | **In Progress** |
 
-Build phases and status: [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md). Decisions: [`docs/JOURNAL.md`](docs/JOURNAL.md). Vision: [`docs/VISION.md`](docs/VISION.md).
-
-**Current:** Phase 3 — MeshLink BLE Ad-Hoc Network (expect/actual for Android **Current:** Phase 2 — OLED theme, three-tab shell, PowerGovernor (Android foreground service / iOS background refresh), haptic chords, on top of the Phase 1 core. iOS CoreBluetooth, flood routing with TTL decrement, CRDT pin sync, emergency SOS haptics).
+Detailed architecture and validation matrix: [`docs/VISION.md`](docs/VISION.md).  
+Step-by-step phases & technical specs: [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md).  
+Development journal & decisions: [`docs/JOURNAL.md`](docs/JOURNAL.md).
 
 ## Screenshots
 

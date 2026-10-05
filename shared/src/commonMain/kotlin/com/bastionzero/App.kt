@@ -27,10 +27,14 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 import com.bastionzero.hal.AcousticEdgeAI
+import com.bastionzero.acoustic.UltrasonicModem
 import com.bastionzero.hal.DeadMansSwitch
 import com.bastionzero.hal.GnssSpoofingDetector
 import com.bastionzero.hal.InertialDeadReckoning
 import com.bastionzero.hal.StructuralTiltMonitor
+import com.bastionzero.hub.TacticalHubBridge
+import com.bastionzero.thermal.ThermalImagingEngine
+import com.bastionzero.trauma.KinematicTraumaLogger
 
 /** Everything the shared UI needs from the platform, assembled by each host app. */
 class AppEnvironment(
@@ -43,6 +47,10 @@ class AppEnvironment(
     val deadMansSwitch: DeadMansSwitch = DeadMansSwitch(),
     val acousticEdgeAI: AcousticEdgeAI = AcousticEdgeAI(),
     val gnssSpoofing: GnssSpoofingDetector = GnssSpoofingDetector(),
+    val traumaLogger: KinematicTraumaLogger = KinematicTraumaLogger(),
+    val thermalEngine: ThermalImagingEngine = ThermalImagingEngine(),
+    val tacticalHub: TacticalHubBridge = TacticalHubBridge(),
+    val ultrasonicModem: UltrasonicModem = UltrasonicModem(),
 )
 
 private enum class Tab(val label: String, val glyph: String) {
