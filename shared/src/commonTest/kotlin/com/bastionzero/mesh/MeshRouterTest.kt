@@ -2,6 +2,7 @@ package com.bastionzero.mesh
 
 import com.bastionzero.crdt.MapPinStore
 import com.bastionzero.crdt.PinKind
+import com.bastionzero.crypto.Ed25519KeyPair
 import com.bastionzero.haptics.HapticChord
 import com.bastionzero.haptics.HapticPlayer
 import com.bastionzero.power.PowerBackend
