@@ -43,7 +43,7 @@ class WikiRepository(private val db: BastionDatabase) {
                 .split(' ')
                 .filter { it.isNotEmpty() }
             if (tokens.isEmpty()) return null
-            return tokens.joinToString(" ") { "${it.lowercase()}*" } // FTS operators are upper-case only
+            return tokens.joinToString(" ") { it.lowercase() }
         }
     }
 }

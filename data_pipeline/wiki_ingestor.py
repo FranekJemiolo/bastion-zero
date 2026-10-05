@@ -23,9 +23,10 @@ CREATE TABLE IF NOT EXISTS WikiArticle (
     category TEXT NOT NULL,
     body     TEXT NOT NULL
 );
-CREATE VIRTUAL TABLE IF NOT EXISTS WikiFts USING fts5(
-    title,
-    body
+CREATE TABLE IF NOT EXISTS WikiFts (
+    id       INTEGER NOT NULL PRIMARY KEY,
+    title    TEXT NOT NULL,
+    body     TEXT NOT NULL
 );
 """
 
@@ -57,7 +58,7 @@ def build(source_dir: Path, out_db: Path) -> int:
                 (i, title, category, body),
             )
             con.execute(
-                "INSERT INTO WikiFts(rowid, title, body) VALUES (?,?,?)", (i, title, body)
+                "INSERT INTO WikiFts(id, title, body) VALUES (?,?,?)", (i, title, body)
             )
         con.commit()
         con.execute("VACUUM")

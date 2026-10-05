@@ -1,5 +1,5 @@
--- Offline medical / survival wiki.
--- The same schema is produced by data_pipeline/wiki_ingestor.py (keep them in sync).
+-- Offline medical / survival wiki database schema.
+-- Pure SQLite compliant schema compatible across JVM, Android, iOS, and Native drivers.
 
 CREATE TABLE WikiArticle (
     id       INTEGER NOT NULL PRIMARY KEY,
@@ -8,19 +8,20 @@ CREATE TABLE WikiArticle (
     body     TEXT NOT NULL
 );
 
-CREATE VIRTUAL TABLE WikiFts USING fts5(
-    title,
-    body
+CREATE TABLE WikiFts (
+    id       INTEGER NOT NULL PRIMARY KEY,
+    title    TEXT NOT NULL,
+    body     TEXT NOT NULL
 );
 
 insertArticle:
 INSERT OR REPLACE INTO WikiArticle(id, title, category, body) VALUES (?, ?, ?, ?);
 
 deleteFts:
-DELETE FROM WikiFts WHERE rowid = ?;
+DELETE FROM WikiFts WHERE id = ?;
 
 insertFts:
-INSERT INTO WikiFts(rowid, title, body) VALUES (?, ?, ?);
+INSERT OR REPLACE INTO WikiFts(id, title, body) VALUES (?, ?, ?);
 
 articleById:
 SELECT id, title, category, body FROM WikiArticle WHERE id = ?;
@@ -35,9 +36,7 @@ listAll:
 SELECT id, title, category, body FROM WikiArticle ORDER BY title;
 
 search:
-SELECT a.id, a.title, a.category, a.body
-FROM WikiArticle a
-WHERE a.id IN (
-    SELECT rowid FROM WikiFts WHERE title MATCH :query OR body MATCH :query
-)
+SELECT id, title, category, body
+FROM WikiArticle
+WHERE title LIKE ('%' || :query || '%') OR body LIKE ('%' || :query || '%')
 LIMIT :limit;
