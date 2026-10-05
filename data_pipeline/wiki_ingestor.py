@@ -25,9 +25,7 @@ CREATE TABLE IF NOT EXISTS WikiArticle (
 );
 CREATE VIRTUAL TABLE IF NOT EXISTS WikiFts USING fts5(
     title,
-    body,
-    content='WikiArticle',
-    content_rowid='id'
+    body
 );
 """
 

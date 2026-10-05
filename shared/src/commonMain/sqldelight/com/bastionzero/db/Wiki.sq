@@ -1,6 +1,5 @@
 -- Offline medical / survival wiki.
 -- The same schema is produced by data_pipeline/wiki_ingestor.py (keep them in sync).
--- FTS5 full text search virtual table content-indexed on WikiArticle.
 
 CREATE TABLE WikiArticle (
     id       INTEGER NOT NULL PRIMARY KEY,
@@ -11,9 +10,7 @@ CREATE TABLE WikiArticle (
 
 CREATE VIRTUAL TABLE WikiFts USING fts5(
     title,
-    body,
-    content='WikiArticle',
-    content_rowid='id'
+    body
 );
 
 insertArticle:
@@ -40,6 +37,7 @@ SELECT id, title, category, body FROM WikiArticle ORDER BY title;
 search:
 SELECT a.id, a.title, a.category, a.body
 FROM WikiArticle a
-JOIN WikiFts ON a.id = WikiFts.rowid
-WHERE WikiFts MATCH ?
+WHERE a.id IN (
+    SELECT rowid FROM WikiFts WHERE WikiFts MATCH ?
+)
 LIMIT ?;
