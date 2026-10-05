@@ -19,7 +19,11 @@ jobs:
       - name: Shared tests on iOS simulator
         run: ./gradlew :shared:iosSimulatorArm64Test
       - name: Generate Xcode project
-        run: brew install xcodegen && xcodegen generate --spec iosApp/project.yml --project iosApp
+        run: |
+          brew install xcodegen
+          xcodegen generate --spec iosApp/project.yml --project iosApp
+          # Normalize objectVersion for Xcode 15 runner compatibility
+          sed -i '' 's/objectVersion = 77;/objectVersion = 56;/g' iosApp/BastionZero.xcodeproj/project.pbxproj 2>/dev/null || true
       - name: Build for simulator
         run: |
           xcodebuild -project iosApp/BastionZero.xcodeproj -scheme iosApp \
