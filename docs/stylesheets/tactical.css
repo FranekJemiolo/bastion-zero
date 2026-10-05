@@ -1,0 +1,330 @@
+/* ==========================================================================
+   BASTION ZERO // TACTICAL SURVIVAL HUD STYLESHEET
+   Aesthetic: Military Olive Drab / Pitch Black OLED / Signal Crimson / Amber HUD
+   ========================================================================== */
+
+:root {
+  --md-primary-fg-color: #0b0e0b;
+  --md-primary-fg-color--light: #162016;
+  --md-primary-fg-color--dark: #050705;
+  --md-accent-fg-color: #ff3b30;
+  --md-default-bg-color: #080a08;
+  --md-default-fg-color: #d1dbcf;
+  --md-default-fg-color--light: #899c86;
+  --md-code-bg-color: #0f140f;
+  
+  --tactical-black: #050705;
+  --tactical-dark-olive: #161e15;
+  --tactical-camo-green: #2d3b2c;
+  --tactical-olive: #495e47;
+  --tactical-signal-red: #ff3b30;
+  --tactical-dim-red: #b02a22;
+  --tactical-amber: #ff9f1c;
+  --tactical-hud-green: #39ff14;
+}
+
+body, .md-content {
+  background-color: #080a08 !important;
+  color: #cdd8cb !important;
+  font-family: "JetBrains Mono", "Courier New", monospace !important;
+}
+
+/* Header & Navigation Bar */
+.md-header {
+  background-color: #0c110c !important;
+  border-bottom: 2px solid var(--tactical-olive) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.9) !important;
+}
+
+.md-header__title {
+  letter-spacing: 0.15em;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #e5ece4 !important;
+}
+
+.md-tabs {
+  background-color: #090d09 !important;
+  border-bottom: 1px solid #1f2b1e !important;
+}
+
+.md-tabs__link--active {
+  color: var(--tactical-signal-red) !important;
+  border-bottom: 2px solid var(--tactical-signal-red) !important;
+}
+
+/* Scanline / Grid overlay effect on hero container */
+.tactical-hero-container {
+  position: relative;
+  border: 1px solid var(--tactical-olive);
+  background: linear-gradient(180deg, #0e140e 0%, #060806 100%);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(45, 59, 44, 0.2);
+}
+
+.tactical-hero-container::before {
+  content: " ";
+  display: block;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%),
+              linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+  z-index: 2;
+  background-size: 100% 4px, 6px 100%;
+  pointer-events: none;
+}
+
+/* Tactical HUD Header banner */
+.tactical-hud-banner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #121a11;
+  border-bottom: 1px solid var(--tactical-olive);
+  padding: 8px 16px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: #9ab097;
+  text-transform: uppercase;
+}
+
+.beacon-pulse {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: var(--tactical-signal-red);
+  border-radius: 50%;
+  margin-right: 8px;
+  box-shadow: 0 0 8px var(--tactical-signal-red);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(0.9); opacity: 0.8; }
+  50% { transform: scale(1.3); opacity: 1; box-shadow: 0 0 14px var(--tactical-signal-red); }
+  100% { transform: scale(0.9); opacity: 0.8; }
+}
+
+/* Tactical Image Cards */
+.tactical-image-frame {
+  position: relative;
+  border: 1px solid var(--tactical-olive);
+  background-color: #0a0e0a;
+  overflow: hidden;
+  margin: 1.5rem 0;
+  border-radius: 4px;
+}
+
+.tactical-image-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: contrast(105%) brightness(95%);
+  transition: transform 0.5s ease, filter 0.5s ease;
+}
+
+.tactical-image-frame:hover img {
+  transform: scale(1.02);
+  filter: contrast(110%) brightness(100%);
+}
+
+.tactical-image-frame .hud-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(5, 7, 5, 0.95) 90%);
+  padding: 20px 20px 14px 20px;
+  z-index: 3;
+}
+
+.hud-overlay .hud-title {
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 4px;
+}
+
+.hud-overlay .hud-meta {
+  color: #9ab097;
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+}
+
+/* Interactive Simulator Terminal */
+.tactical-simulator {
+  background-color: #0b0f0b;
+  border: 2px solid var(--tactical-camo-green);
+  border-radius: 4px;
+  padding: 20px;
+  margin: 2rem 0;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.9);
+}
+
+.sim-screen {
+  background-color: #040604;
+  border: 1px solid #1c261b;
+  border-radius: 4px;
+  padding: 16px;
+  min-height: 180px;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.8rem;
+  color: #8ce980;
+  overflow-y: auto;
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.95);
+  margin-bottom: 16px;
+}
+
+.sim-screen .log-sos {
+  color: var(--tactical-signal-red);
+  font-weight: 800;
+}
+
+.sim-screen .log-pin {
+  color: var(--tactical-amber);
+}
+
+.sim-screen .log-hop {
+  color: #6edb5f;
+}
+
+.sim-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.tactical-btn {
+  background-color: #141c13;
+  color: #c7d6c4;
+  border: 1px solid var(--tactical-olive);
+  padding: 8px 16px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.tactical-btn:hover {
+  background-color: var(--tactical-camo-green);
+  color: #ffffff;
+  border-color: #799a74;
+}
+
+.tactical-btn.btn-sos {
+  background-color: #3b0906;
+  border-color: var(--tactical-signal-red);
+  color: #ff8e88;
+}
+
+.tactical-btn.btn-sos:hover {
+  background-color: var(--tactical-signal-red);
+  color: #000000;
+}
+
+.tactical-btn.btn-amber {
+  background-color: #2b1d06;
+  border-color: var(--tactical-amber);
+  color: #ffd188;
+}
+
+.tactical-btn.btn-amber:hover {
+  background-color: var(--tactical-amber);
+  color: #000000;
+}
+
+/* Feature Grid Cards */
+.tactical-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+  margin: 1.5rem 0;
+}
+
+.tactical-card {
+  background-color: #0c110c;
+  border: 1px solid #233121;
+  border-left: 4px solid var(--tactical-olive);
+  padding: 18px;
+  border-radius: 3px;
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.tactical-card:hover {
+  border-left-color: var(--tactical-signal-red);
+  transform: translateY(-2px);
+  background-color: #101610;
+}
+
+.tactical-card h4 {
+  color: #f0f5ee !important;
+  margin-top: 0 !important;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.tactical-card p {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #a4b8a2;
+}
+
+/* Spec Badges */
+.tactical-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-radius: 2px;
+  margin-right: 6px;
+  letter-spacing: 0.06em;
+}
+
+.badge-red {
+  background-color: #4a0d0a;
+  color: #ff918c;
+  border: 1px solid var(--tactical-signal-red);
+}
+
+.badge-green {
+  background-color: #122910;
+  color: #79f76a;
+  border: 1px solid #337a2f;
+}
+
+.badge-amber {
+  background-color: #3b2805;
+  color: #ffd27a;
+  border: 1px solid var(--tactical-amber);
+}
+
+/* Table overrides */
+.md-typeset table:not([class]) {
+  background-color: #0b100b;
+  border: 1px solid #223021;
+  font-size: 0.8rem;
+}
+
+.md-typeset table:not([class]) th {
+  background-color: #151e14;
+  color: #e5ece4;
+  border-bottom: 2px solid var(--tactical-olive);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.md-typeset table:not([class]) td {
+  border-bottom: 1px solid #1c261b;
+  color: #b0c2ae;
+}

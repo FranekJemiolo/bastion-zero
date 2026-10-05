@@ -1,19 +1,47 @@
 site_name: Bastion Zero
-site_description: Offline-first, zero-cloud survival platform for Android and iOS.
+site_description: 100% Offline, Zero-Cloud Cross-Platform Survival Multi-Tool & Ad-Hoc Mesh Network.
 site_url: https://franekjemiolo.github.io/bastion-zero/
 repo_url: https://github.com/FranekJemiolo/bastion-zero
 docs_dir: docs
+
 theme:
   name: material
   palette:
     scheme: slate
     primary: black
     accent: red
+  font:
+    text: JetBrains Mono
+    code: JetBrains Mono
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+  icon:
+    repo: fontawesome/brands/github
+
+extra_css:
+  - stylesheets/tactical.css
+
+extra_javascript:
+  - javascripts/tactical_hud.js
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - attr_list
+  - md_in_html
+  - tables
+
 nav:
-  - Home: index.md
-  - Vision: VISION.md
-  - Implementation plan: IMPLEMENTATION_PLAN.md
-  - Architecture: ARCHITECTURE.md
-  - Mesh protocol: PROTOCOL.md
+  - Tactical Dashboard: index.md
+  - Operational Vision: VISION.md
+  - Implementation Plan: IMPLEMENTATION_PLAN.md
+  - System Architecture: ARCHITECTURE.md
+  - Mesh Protocol: PROTOCOL.md
   - Releasing: RELEASING.md
-  - Journal: JOURNAL.md
+  - Architecture Journal: JOURNAL.md
