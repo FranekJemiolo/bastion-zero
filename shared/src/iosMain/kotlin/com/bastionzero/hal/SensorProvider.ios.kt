@@ -1,6 +1,7 @@
 package com.bastionzero.hal
 
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.useContents
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -102,9 +103,7 @@ actual class SensorProvider : SensorStream {
         if (!isRunning) return
         isRunning = false
 
-        if (motionManager.isDeviceMotionActive()) {
-            motionManager.stopDeviceMotionUpdates()
-        }
+        motionManager.stopDeviceMotionUpdates()
         altimeter.stopRelativeAltitudeUpdates()
     }
 }

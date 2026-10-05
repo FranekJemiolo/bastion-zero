@@ -36,14 +36,17 @@ class WikiRepository(private val db: BastionDatabase) {
     }
 
     companion object {
+        private val STOP_WORDS = setOf("or", "and", "not")
+
         internal fun toFtsQuery(input: String): String? {
             val tokens = input
                 .map { if (it.isLetterOrDigit()) it else ' ' }
                 .joinToString("")
                 .split(' ')
-                .filter { it.isNotEmpty() }
+                .map { it.lowercase() }
+                .filter { it.isNotEmpty() && it !in STOP_WORDS }
             if (tokens.isEmpty()) return null
-            return tokens.joinToString(" ") { it.lowercase() }
+            return tokens.joinToString(" ")
         }
     }
 }

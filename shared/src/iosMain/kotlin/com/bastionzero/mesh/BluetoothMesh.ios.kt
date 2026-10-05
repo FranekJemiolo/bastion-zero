@@ -29,7 +29,7 @@ import platform.CoreBluetooth.CBCharacteristicPropertyNotify
 import platform.CoreBluetooth.CBCharacteristicPropertyRead
 import platform.CoreBluetooth.CBCharacteristicPropertyWrite
 import platform.CoreBluetooth.CBCharacteristicPropertyWriteWithoutResponse
-import platform.CoreBluetooth.CBCharacteristicWriteType
+import platform.CoreBluetooth.CBCharacteristicWriteWithoutResponse
 import platform.CoreBluetooth.CBError
 import platform.CoreBluetooth.CBManagerState
 import platform.CoreBluetooth.CBManagerStatePoweredOn
@@ -148,7 +148,7 @@ actual class BluetoothMesh : MeshTransport {
                 peripheral.writeValue(
                     outbound.toNSData(),
                     forCharacteristic = didUpdateValueForCharacteristic,
-                    type = CBCharacteristicWriteType.CBCharacteristicWriteWithoutResponse,
+                    type = CBCharacteristicWriteWithoutResponse,
                 )
             }
 

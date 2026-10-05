@@ -83,6 +83,8 @@ class AcousticEdgeAITest {
             gunshotAudio[i] = 0.95f
         }
 
+        ai.processAudioChunk(gunshotAudio, timestampNs = 2_000_000_000L)
+
         val spectrogram = ai.computeSpectrogram()
         val event = ai.classifySpectrogram(spectrogram, splDb = 95.0f, timestampNs = 2_000_000_000L)
 

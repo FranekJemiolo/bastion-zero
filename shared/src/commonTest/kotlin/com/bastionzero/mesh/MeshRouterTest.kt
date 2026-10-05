@@ -18,7 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 
 class FakeMeshTransport : MeshTransport {
@@ -87,13 +87,14 @@ class MeshRouterTest {
 
     @Test
     fun floodRoutesValidPacketWithDecrementedTtl() = runTest {
-        val router = createRouter(this)
+        val router = createRouter(backgroundScope)
         val packet = remoteSigner.create(
             type = SurvivalPacket.PacketType.PING,
             ttl = 5,
         )
 
         transport.simulateIncoming(packet)
+        testScheduler.advanceUntilIdle()
 
         assertEquals(1, transport.broadcasted.size)
         val forwarded = transport.broadcasted.first()
@@ -104,49 +105,53 @@ class MeshRouterTest {
 
     @Test
     fun haltsFloodWhenTtlIsOne() = runTest {
-        val router = createRouter(this)
+        val router = createRouter(backgroundScope)
         val packet = remoteSigner.create(
             type = SurvivalPacket.PacketType.PING,
             ttl = 1,
         )
 
         transport.simulateIncoming(packet)
+        testScheduler.advanceUntilIdle()
 
         assertEquals(0, transport.broadcasted.size)
     }
 
     @Test
     fun dropsReplayedPacketsWithoutForwarding() = runTest {
-        val router = createRouter(this)
+        val router = createRouter(backgroundScope)
         val packet = remoteSigner.create(
             type = SurvivalPacket.PacketType.PING,
             ttl = 4,
         )
 
         transport.simulateIncoming(packet)
+        testScheduler.advanceUntilIdle()
         assertEquals(1, transport.broadcasted.size)
 
         // Simulate duplicate arrival
         transport.simulateIncoming(packet)
+        testScheduler.advanceUntilIdle()
         assertEquals(1, transport.broadcasted.size) // No second broadcast
     }
 
     @Test
     fun incomingSosTriggersHapticAlarm() = runTest {
-        val router = createRouter(this)
+        val router = createRouter(backgroundScope)
         val sos = remoteSigner.create(
             type = SurvivalPacket.PacketType.SOS_MEDICAL,
             ttl = 3,
         )
 
         transport.simulateIncoming(sos)
+        testScheduler.advanceUntilIdle()
 
         assertTrue(haptics.played.contains(HapticChord.MEDICAL_SOS))
     }
 
     @Test
     fun droppingPinSignsBroadcastsAndStoresInCrdt() = runTest {
-        val router = createRouter(this)
+        val router = createRouter(backgroundScope)
         val pin = router.dropPin(PinKind.HAZARD, "Downed Wire", 52_000_000, 21_000_000)
 
         assertNotNull(pin)

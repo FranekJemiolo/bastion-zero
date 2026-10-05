@@ -51,7 +51,7 @@ class StructuralTiltMonitorTest {
 
         // Feed steady reading with 0.7° foundation shift (Critical Alarm!)
         // 0.7 deg tilt on X: ax = 9.80665 * sin(0.7 deg) = ~0.12 m/s^2
-        for (i in 0 until 30) {
+        for (i in 0 until 80) {
             monitor.processSample(0.13f, 0f, 9.806f, 20.0f)
         }
 
