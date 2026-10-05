@@ -1,8 +1,9 @@
 package com.bastionzero.e2e
 
 import com.bastionzero.acoustic.UltrasonicModem
+import com.bastionzero.crdt.MapPin
 import com.bastionzero.crdt.MapPinStore
-import com.bastionzero.crdt.PinType
+import com.bastionzero.crdt.PinKind
 import com.bastionzero.crypto.Ed25519
 import com.bastionzero.hub.RadiationHazardLevel
 import com.bastionzero.hub.TacticalHubBridge
@@ -11,15 +12,16 @@ import com.bastionzero.medical.OpticalVitalsSample
 import com.bastionzero.medical.WoundPhotogrammetry
 import com.bastionzero.medical.WoundType
 import com.bastionzero.mesh.LamportClock
+import com.bastionzero.mesh.PacketSigner
 import com.bastionzero.mesh.PacketValidator
-import com.bastionzero.proto.PacketType
+import com.bastionzero.mesh.ReplayGuard
+import com.bastionzero.mesh.Verdict
 import com.bastionzero.proto.SurvivalPacket
 import com.bastionzero.testing.FakeEd25519
 import com.bastionzero.thermal.SurfaceMaterial
 import com.bastionzero.thermal.ThermalImagingEngine
 import com.bastionzero.trauma.KinematicTraumaLogger
 import com.bastionzero.trauma.TraumaSeverity
-import okio.ByteString.Companion.toByteString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -70,45 +72,37 @@ class DisasterScenarioE2ETest {
         assertNotNull(vitals)
         assertTrue(vitals.heartRateBpm > 100)
 
-        // 2. Package into SurvivalPacket Protobuf
+        // 2. Package into SurvivalPacket Protobuf and sign via PacketSigner
         val triagePayloadString = "${impactEvent.lockScreenTriageAlert} | Vitals: ${vitals.heartRateBpm} BPM SpO2:${vitals.spo2Percent}%"
         val payloadBytes = triagePayloadString.encodeToByteArray()
 
-        val unsignedPacket = SurvivalPacket(
-            packet_id = "pkt-trauma-001",
-            logical_clock = clockA.tick(),
-            sender_id = keyPairA.publicKeyHex,
-            type = PacketType.SOS_MEDICAL,
-            lat_micro = 49200000,
-            lon_micro = 22400000,
-            altitude_meters = 1150,
+        val signerA = PacketSigner(keyPairA, clockA, ed25519)
+        val signedPacketA = signerA.create(
+            type = SurvivalPacket.PacketType.SOS_MEDICAL,
+            latE6 = 49200000,
+            lonE6 = 22400000,
+            altitudeDm = 11500,
+            payload = payloadBytes,
             ttl = 3,
-            payload = payloadBytes.toByteString(),
-            signature = ByteArray(0).toByteString(),
         )
 
-        // Sign packet
-        val canonicalBytes = unsignedPacket.copy(signature = ByteArray(0).toByteString()).encode()
-        val signature = ed25519.sign(canonicalBytes, keyPairA.privateKey)
-        val signedPacketA = unsignedPacket.copy(signature = signature.toByteString())
-
         // 3. Relay through Node B
-        val validatorB = PacketValidator(ed25519)
-        assertTrue(validatorB.validate(signedPacketA))
+        val validatorB = PacketValidator(ed25519, ReplayGuard(), LamportClock())
+        assertEquals(Verdict.ACCEPT, validatorB.validate(signedPacketA))
 
         // Node B decrements TTL and forwards
         val forwardedPacketB = signedPacketA.copy(ttl = signedPacketA.ttl - 1)
         assertEquals(2, forwardedPacketB.ttl)
 
         // 4. Relay through Node C
-        val validatorC = PacketValidator(ed25519)
-        assertTrue(validatorC.validate(forwardedPacketB))
+        val validatorC = PacketValidator(ed25519, ReplayGuard(), LamportClock())
+        assertEquals(Verdict.ACCEPT, validatorC.validate(forwardedPacketB))
         val forwardedPacketC = forwardedPacketB.copy(ttl = forwardedPacketB.ttl - 1)
         assertEquals(1, forwardedPacketC.ttl)
 
         // 5. Node D (Tactical Hub Base Station): Ingest and bridge over LoRa
-        val validatorD = PacketValidator(ed25519)
-        assertTrue(validatorD.validate(forwardedPacketC))
+        val validatorD = PacketValidator(ed25519, ReplayGuard(), LamportClock())
+        assertEquals(Verdict.ACCEPT, validatorD.validate(forwardedPacketC))
 
         val hubBridgeD = TacticalHubBridge()
         hubBridgeD.setLoRaConnected(true, 915.0f)
@@ -122,8 +116,8 @@ class DisasterScenarioE2ETest {
         assertNotNull(recoveredBytes)
 
         val recoveredPacket = SurvivalPacket.ADAPTER.decode(recoveredBytes)
-        assertEquals("pkt-trauma-001", recoveredPacket.packet_id)
-        assertEquals(PacketType.SOS_MEDICAL, recoveredPacket.type)
+        assertEquals(signedPacketA.packetId, recoveredPacket.packetId)
+        assertEquals(SurvivalPacket.PacketType.SOS_MEDICAL, recoveredPacket.type)
 
         val recoveredText = recoveredPacket.payload.toByteArray().decodeToString()
         assertTrue(recoveredText.contains("SEVERE TRAUMA IMPACT ALERT"))
@@ -144,35 +138,39 @@ class DisasterScenarioE2ETest {
         assertTrue(acute.isExclusionZoneTriggered)
 
         // 3. Create Hazard Pin in CRDT MapPinStore
-        val pinStoreA = MapPinStore()
-        pinStoreA.upsertPin(
-            pinId = "hazard-rad-zone-1",
-            lat = 49.321,
-            lon = 22.456,
-            type = PinType.HAZARD,
-            title = "CRITICAL RADIATION EXCLUSION ZONE (150 uSv/h)",
-            author = "Node_Alpha",
+        val clockA = LamportClock()
+        val pinStoreA = MapPinStore("Node_Alpha", clockA)
+        pinStoreA.add(
+            MapPin(
+                id = "hazard-rad-zone-1",
+                kind = PinKind.HAZARD,
+                label = "CRITICAL RADIATION EXCLUSION ZONE (150 uSv/h)",
+                latE6 = 49321000,
+                lonE6 = 22456000,
+            )
         )
 
-        // 4. Synchronize with Peer PinStore B
-        val pinStoreB = MapPinStore()
-        val allPinsA = pinStoreA.getAllPins()
+        // 4. Synchronize with Peer PinStore B via CRDT merge
+        val clockB = LamportClock()
+        val pinStoreB = MapPinStore("Node_Bravo", clockB)
+        val allPinsA = pinStoreA.pins()
         assertEquals(1, allPinsA.size)
 
-        for (pin in allPinsA) {
-            pinStoreB.upsertPin(
-                pinId = pin.id,
-                lat = pin.lat,
-                lon = pin.lon,
-                type = pin.type,
-                title = pin.title,
-                author = pin.author,
-            )
-        }
+        val changed = pinStoreB.merge(pinStoreA)
+        assertTrue(changed)
 
-        val allPinsB = pinStoreB.getAllPins()
+        val allPinsB = pinStoreB.pins()
         assertEquals(1, allPinsB.size)
-        assertEquals("CRITICAL RADIATION EXCLUSION ZONE (150 uSv/h)", allPinsB[0].title)
+        assertEquals("CRITICAL RADIATION EXCLUSION ZONE (150 uSv/h)", allPinsB[0].label)
+
+        // 5. Node Bravo confirms the pin observation
+        pinStoreB.confirm(allPinsB[0].id)
+        assertEquals(1, pinStoreB.confirmationCount(allPinsB[0].id))
+
+        // Sync confirmation back to Node Alpha
+        val syncedBack = pinStoreA.merge(pinStoreB)
+        assertTrue(syncedBack)
+        assertEquals(1, pinStoreA.confirmationCount(allPinsB[0].id))
     }
 
     @Test
