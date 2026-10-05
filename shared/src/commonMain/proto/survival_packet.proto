@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package com.bastionzero.proto;
+
+option java_package = "com.bastionzero.proto";
+
+// Wire-format contract for every MeshLink payload. See docs/PROTOCOL.md.
+//
+// Field names are lowerCamelCase on purpose so the generated Kotlin API is
+// identical regardless of the code generator's naming policy.
+//
+// Signing rule: signature = Ed25519(senderId's key, encode(packet with
+// `signature` = empty and `ttl` = 0)). `ttl` is the only hop-mutable field,
+// so relays may decrement it without invalidating the signature.
+message SurvivalPacket {
+  // Random 64-bit id, only used as a cheap dedup hint. Authoritative
+  // identity is (senderId, lamport).
+  fixed64 packetId = 1;
+
+  // Lamport logical clock of the ORIGIN node at creation time. Never trust
+  // wall-clock time in a grid-down network.
+  uint64 lamport = 2;
+
+  // 32-byte Ed25519 public key of the origin node.
+  bytes senderId = 3;
+
+  enum PacketType {
+    PING = 0;
+    SOS_MEDICAL = 1;
+    SOS_RESCUE = 2;
+    HAZARD_PIN = 3;
+    RESOURCE_PIN = 4;
+    PIN_REMOVE = 5;
+    PIN_CONFIRM = 6;
+  }
+  PacketType type = 4;
+
+  // Micro-degrees (deg * 1e6) and decimetres, zig-zag encoded for size.
+  sint32 latE6 = 5;
+  sint32 lonE6 = 6;
+  sint32 altitudeDm = 7;
+
+  // Type-specific body (e.g. an encoded PinPayload or a medical code).
+  bytes payload = 8;
+
+  // Remaining hop budget for flood routing. NOT covered by the signature.
+  uint32 ttl = 9;
+
+  // 64-byte Ed25519 detached signature. Empty while signing.
+  bytes signature = 10;
+
+  // Advisory wall-clock seconds from the origin device. Never used for
+  // ordering or replay decisions; display only.
+  uint64 wallClockHint = 11;
+}

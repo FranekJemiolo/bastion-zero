@@ -1,0 +1,45 @@
+-- Offline medical / survival wiki.
+-- The same schema is produced by data_pipeline/wiki_ingestor.py (keep them in sync).
+-- FTS4 (not FTS5) is deliberate: it is available in the SQLite bundled with every
+-- Android API level >= 26 and on iOS, while FTS5 is not guaranteed on older Android.
+
+CREATE TABLE WikiArticle (
+    id       INTEGER NOT NULL PRIMARY KEY,
+    title    TEXT NOT NULL,
+    category TEXT NOT NULL,
+    body     TEXT NOT NULL
+);
+
+CREATE VIRTUAL TABLE WikiFts USING fts4(
+    title,
+    body,
+    tokenize=unicode61
+);
+
+insertArticle:
+INSERT OR REPLACE INTO WikiArticle(id, title, category, body) VALUES (?, ?, ?, ?);
+
+deleteFts:
+DELETE FROM WikiFts WHERE docid = ?;
+
+insertFts:
+INSERT INTO WikiFts(docid, title, body) VALUES (?, ?, ?);
+
+articleById:
+SELECT id, title, category, body FROM WikiArticle WHERE id = ?;
+
+articleCount:
+SELECT COUNT(*) FROM WikiArticle;
+
+listByCategory:
+SELECT id, title, category, body FROM WikiArticle WHERE category = ? ORDER BY title;
+
+listAll:
+SELECT id, title, category, body FROM WikiArticle ORDER BY title;
+
+search:
+SELECT a.id, a.title, a.category, a.body
+FROM WikiFts
+JOIN WikiArticle a ON a.id = WikiFts.docid
+WHERE WikiFts MATCH ?
+LIMIT ?;

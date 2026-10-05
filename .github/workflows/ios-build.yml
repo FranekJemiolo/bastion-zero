@@ -1,0 +1,46 @@
+name: iOS build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Shared tests on iOS simulator
+        run: ./gradlew :shared:iosSimulatorArm64Test
+      - name: Generate Xcode project
+        run: brew install xcodegen && xcodegen generate --spec iosApp/project.yml --project iosApp
+      - name: Build for simulator
+        run: |
+          xcodebuild -project iosApp/BastionZero.xcodeproj -scheme iosApp \
+            -sdk iphonesimulator -configuration Debug \
+            -destination 'generic/platform=iOS Simulator' build CODE_SIGNING_ALLOWED=NO
+
+  # TestFlight hook: runs only for version tags AND when App Store Connect secrets exist.
+  # Signing/archiving is intentionally left as a documented TODO (see docs/RELEASING.md)
+  # because it needs certificates that must never live in this public repo.
+  testflight:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: macos-14
+    env:
+      HAS_ASC_KEY: ${{ secrets.ASC_KEY_ID != '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check secrets
+        run: |
+          if [ "$HAS_ASC_KEY" != "true" ]; then
+            echo "::notice::ASC_KEY_ID not configured; skipping TestFlight upload."
+            exit 0
+          fi
+          echo "::warning::Archive + upload steps not implemented yet (docs/RELEASING.md)."

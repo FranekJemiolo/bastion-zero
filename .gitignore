@@ -1,0 +1,23 @@
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+.kotlin/
+.DS_Store
+captures/
+# iOS
+iosApp/*.xcodeproj
+iosApp/build/
+xcuserdata/
+Pods/
+# Python
+__pycache__/
+*.pyc
+.venv/
+data_pipeline/out/
+# MkDocs
+site/
+# Secrets / signing
+*.jks
+*.keystore

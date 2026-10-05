@@ -1,0 +1,19 @@
+site_name: Bastion Zero
+site_description: Offline-first, zero-cloud survival platform for Android and iOS.
+site_url: https://franekjemiolo.github.io/bastion-zero/
+repo_url: https://github.com/FranekJemiolo/bastion-zero
+docs_dir: docs
+theme:
+  name: material
+  palette:
+    scheme: slate
+    primary: black
+    accent: red
+nav:
+  - Home: index.md
+  - Vision: VISION.md
+  - Implementation plan: IMPLEMENTATION_PLAN.md
+  - Architecture: ARCHITECTURE.md
+  - Mesh protocol: PROTOCOL.md
+  - Releasing: RELEASING.md
+  - Journal: JOURNAL.md
