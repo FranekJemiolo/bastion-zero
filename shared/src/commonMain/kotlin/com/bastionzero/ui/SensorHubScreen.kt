@@ -115,9 +115,9 @@ fun SensorHubContent(
 
         // 2. Inertial Dead Reckoning
         CardBox(title = "INERTIAL DEAD RECKONING (PDR)") {
-            Text("Steps: ${drState.stepCount} · Distance: ${"%.1f".format(drState.totalDistanceMeters)} m", color = BastionColors.Red)
-            Text("Heading: ${"%.1f".format(drState.headingDegrees)}° · Altitude: ${"%.1f".format(drState.altitudeMeters)} m")
-            Text("DR Position: ${"%.5f".format(drState.lat)}, ${"%.5f".format(drState.lon)}", color = BastionColors.DimRed)
+            Text("Steps: ${drState.stepCount} · Distance: ${drState.totalDistanceMeters.formatDecimals(1)} m", color = BastionColors.Red)
+            Text("Heading: ${drState.headingDegrees.formatDecimals(1)}° · Altitude: ${drState.altitudeMeters.formatDecimals(1)} m")
+            Text("DR Position: ${drState.lat.formatDecimals(5)}, ${drState.lon.formatDecimals(5)}", color = BastionColors.DimRed)
             Text("Breadcrumb Count: ${drState.breadcrumbs.size}", color = BastionColors.DimRed)
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -159,8 +159,8 @@ fun SensorHubContent(
             }
             Text("Status: ${tiltStatus.severity}", color = statusColor, style = MaterialTheme.typography.titleMedium)
             Text("Calibrated: ${if (tiltStatus.isCalibrated) "YES" else "AWAITING ZERO"}")
-            Text("Tilt Deviation: ${"%.3f".format(tiltStatus.temperatureCompensatedDeltaDeg)}° (Raw: ${"%.3f".format(tiltStatus.currentTiltDeg)}°)")
-            Text("Thermistor: ${"%.1f".format(tiltStatus.currentTempCelsius)}°C (Ref: ${"%.1f".format(tiltStatus.baselineTempCelsius)}°C)", color = BastionColors.DimRed)
+            Text("Tilt Deviation: ${tiltStatus.temperatureCompensatedDeltaDeg.formatDecimals(3)}° (Raw: ${tiltStatus.currentTiltDeg.formatDecimals(3)}°)")
+            Text("Thermistor: ${tiltStatus.currentTempCelsius.formatDecimals(1)}°C (Ref: ${tiltStatus.baselineTempCelsius.formatDecimals(1)}°C)", color = BastionColors.DimRed)
             if (tiltStatus.isAlarmTriggered) {
                 Text("⚠️ WARNING: FOUNDATION SHIFT EXCEEDS 0.5° THRESHOLD", color = BastionColors.Red)
             }
@@ -204,11 +204,11 @@ fun SensorHubContent(
 
         // 5. Acoustic Edge Overwatch
         CardBox(title = "ACOUSTIC OVERWATCH (70 dB DSP GATE)") {
-            Text("Live SPL: ${"%.1f".format(currentSpl)} dB SPL (Gate: > 70 dB)", color = if (currentSpl >= 70f) BastionColors.Red else BastionColors.DimRed)
+            Text("Live SPL: ${currentSpl.formatDecimals(1)} dB SPL (Gate: > 70 dB)", color = if (currentSpl >= 70f) BastionColors.Red else BastionColors.DimRed)
             val threat = latestThreat
             if (threat != null) {
                 Text("Detected: ${threat.signature} (${(threat.confidence * 100).toInt()}%)", color = BastionColors.Red)
-                Text("Dominant Frequency: ${"%.0f".format(threat.dominantFrequencyHz)} Hz", color = BastionColors.DimRed)
+                Text("Dominant Frequency: ${threat.dominantFrequencyHz.formatDecimals(0)} Hz", color = BastionColors.DimRed)
             } else {
                 Text("Acoustic Signature: QUIET / AMBIENT MONITORING", color = BastionColors.DimRed)
             }
@@ -231,7 +231,7 @@ fun SensorHubContent(
         CardBox(title = "GNSS EW & ANTI-SPOOFING DEFENSE") {
             Text("Integrity: ${if (gnssReport.isSpoofed) "SPOOFED (FALLBACK ACTIVE)" else "AUTHENTIC"}",
                 color = if (gnssReport.isSpoofed) BastionColors.Red else BastionColors.DimRed)
-            Text("AGC Level: ${"%.1f".format(gnssReport.agcLevelDb)} dB · Baseline: ${"%.1f".format(gnssReport.baselineAgcDb)} dB")
+            Text("AGC Level: ${gnssReport.agcLevelDb.formatDecimals(1)} dB · Baseline: ${gnssReport.baselineAgcDb.formatDecimals(1)} dB")
             Text("Clock Drift: ${gnssReport.clockDriftNanosPerSec} ns/s · Satellites: ${gnssReport.satelliteCount}")
 
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -282,4 +282,42 @@ private fun CardBox(
         Text(title, style = MaterialTheme.typography.titleSmall, color = BastionColors.Red)
         content()
     }
+}
+
+private fun Float.formatDecimals(decimals: Int): String {
+    val factor = when (decimals) {
+        0 -> 1.0
+        1 -> 10.0
+        2 -> 100.0
+        3 -> 1000.0
+        4 -> 10000.0
+        5 -> 100000.0
+        else -> 10.0
+    }
+    val rounded = kotlin.math.round(this * factor) / factor
+    if (decimals == 0) return rounded.toLong().toString()
+    val str = rounded.toString()
+    val parts = str.split('.')
+    if (parts.size == 1) return "$str." + "0".repeat(decimals)
+    val dec = parts[1].padEnd(decimals, '0').take(decimals)
+    return "${parts[0]}.$dec"
+}
+
+private fun Double.formatDecimals(decimals: Int): String {
+    val factor = when (decimals) {
+        0 -> 1.0
+        1 -> 10.0
+        2 -> 100.0
+        3 -> 1000.0
+        4 -> 10000.0
+        5 -> 100000.0
+        else -> 10.0
+    }
+    val rounded = kotlin.math.round(this * factor) / factor
+    if (decimals == 0) return rounded.toLong().toString()
+    val str = rounded.toString()
+    val parts = str.split('.')
+    if (parts.size == 1) return "$str." + "0".repeat(decimals)
+    val dec = parts[1].padEnd(decimals, '0').take(decimals)
+    return "${parts[0]}.$dec"
 }
