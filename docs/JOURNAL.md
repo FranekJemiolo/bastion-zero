@@ -73,3 +73,27 @@ See "Reality-check notes" in [VISION](VISION.md): several brainstorm ideas (DSP 
 - Compose Multiplatform 1.7 Material3 color roles (`surfaceContainer*`) assumed present.
 - Foreground service cannot be started from the background on Android 12+; it is only started from the Activity.
 - Real-world Doze behaviour (OEM battery killers) needs on-device testing; no emulator test exists.
+
+---
+
+## Phase 3 — MeshLink Ad-Hoc Network (2026-10-05)
+
+**Status:** code written; unit tests added in `shared/src/commonTest/kotlin/com/bastionzero/mesh/MeshRouterTest.kt`.
+
+### Decisions
+
+| # | Decision | Why | Revisit when |
+| - | --- | --- | --- |
+| D33 | `MeshTransport` common interface + `expect class BluetoothMesh : MeshTransport` in `shared` | Clean common interface allows unit test mocking (`FakeMeshTransport`), while fulfilling the strict expect/actual pattern for native platform drivers | — |
+| D34 | Dedicated 128-bit Service UUID (`b0z00001-0000-1000-8000-00805f9b34fb`) and Characteristic UUID (`b0z00002-...`) | Complies with standard BLE GATT spec without colliding with SIG-reserved 16-bit IDs | — |
+| D35 | Dual-mode GATT server & client on both Android and iOS | Advertisements alone have a 31-byte limit in legacy BLE. Hosting a GATT service lets nodes exchange complete 100-200 byte Protobuf packets bi-directionally without pairing | Extended Advertising (BLE 5.0) when targeting exclusively modern devices |
+| D36 | Strict compliance with Apple iOS background BLE scanning | iOS drops scans without specific service UUIDs when backgrounded. `CBCentralManager.scanForPeripheralsWithServices(listOf(serviceUuid))` is strictly used, and `bluetooth-central`/`bluetooth-peripheral` background modes are added to `project.yml` | — |
+| D37 | Android 12+ (API 31+) permission flags: `neverForLocation` on `BLUETOOTH_SCAN` | Avoids demanding continuous GPS location permission just for BLE mesh scanning on modern Android | If beacon distance estimation requires location data |
+| D38 | Flood routing with decremented TTL (`ttl - 1`) and `ReplayGuard` suppression | Every verified packet with `ttl > 1` is re-broadcasted. Packets with `ttl == 1` halt. Replayed or looped packets hit the sliding window / signature cache and are dropped immediately without re-transmission | When dynamic TTL based on network density is desired |
+| D39 | CRDT Map Pin integration: pins received over BLE automatically merge into `MapPinStore` | True serverless convergence for crowdsourced hazard and resource pins | — |
+| D40 | Immediate Haptic alarms for high-priority mesh packets | Receiving an `SOS_MEDICAL` or `SOS_RESCUE` packet instantly fires `HapticChord.MEDICAL_SOS`; receiving a `HAZARD_PIN` fires `HapticChord.HAZARD_APPROACHING` | — |
+| D41 | `MeshRouter` coordinating layer with `MeshFactory` | Decouples UI from raw Bluetooth APIs; binds cryptography, logical clocks, CRDT stores, and BLE transport together | — |
+
+### Known risks / unverified
+- CoreBluetooth delegates in Kotlin/Native require execution on the main queue (`dispatch_get_main_queue()`) or a dedicated dispatch queue.
+- Android foreground service type updated to `specialUse|connectedDevice`. Some Android 14+ OEM ROMs enforce specific connectedDevice use cases.

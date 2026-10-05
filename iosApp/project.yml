@@ -19,9 +19,10 @@ targets:
         CFBundleDisplayName: Bastion Zero
         UILaunchScreen: {}
         UIRequiredDeviceCapabilities: [arm64]
-        UIBackgroundModes: [fetch]
+        UIBackgroundModes: [fetch, bluetooth-central, bluetooth-peripheral]
         BGTaskSchedulerPermittedIdentifiers: [com.bastionzero.ios.refresh]
-        # Phase 3 adds NSBluetoothAlwaysUsageDescription + bluetooth-central/peripheral modes.
+        NSBluetoothAlwaysUsageDescription: "Bastion Zero uses Bluetooth Low Energy to create an offline ad-hoc survival mesh network."
+        NSBluetoothPeripheralUsageDescription: "Bastion Zero advertises as a Bluetooth Low Energy node to relay survival data."
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.bastionzero.ios

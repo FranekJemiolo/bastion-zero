@@ -10,7 +10,7 @@ Phases are gated: the next starts only after the previous is confirmed compiling
 | --- | --- | --- |
 | 1 | KMP scaffold & shared data core | Implemented (build unconfirmed) |
 | 2 | PowerOS & cross-platform UI | **Implemented — awaiting build confirmation** |
-| 3 | MeshLink BLE (expect/actual) | Planned |
+| 3 | MeshLink BLE (expect/actual) | **Implemented — awaiting build confirmation** |
 | 4 | Sensor HAL & edge intelligence | Planned |
 
 ## Phase 1 — KMP scaffolding & shared data core

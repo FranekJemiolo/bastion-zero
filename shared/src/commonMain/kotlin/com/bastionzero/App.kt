@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import com.bastionzero.db.WikiRepository
 import com.bastionzero.db.WikiSeed
 import com.bastionzero.haptics.HapticPlayer
+import com.bastionzero.mesh.MeshRouter
 import com.bastionzero.power.PowerGovernor
 import com.bastionzero.ui.BastionColors
 import com.bastionzero.ui.BastionTheme
@@ -30,6 +31,7 @@ class AppEnvironment(
     val wiki: WikiRepository,
     val power: PowerGovernor,
     val haptics: HapticPlayer,
+    val mesh: MeshRouter,
 )
 
 private enum class Tab(val label: String, val glyph: String) {
@@ -71,7 +73,7 @@ fun App(env: AppEnvironment) {
         ) { padding ->
             val m = Modifier.padding(padding)
             when (tab) {
-                Tab.MeshMap -> MeshMapScreen(m)
+                Tab.MeshMap -> MeshMapScreen(env.mesh, m)
                 Tab.SensorHub -> SensorHubScreen(env.power, env.haptics, m)
                 Tab.OfflineWiki -> WikiScreen(env.wiki, m)
             }

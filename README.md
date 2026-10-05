@@ -20,7 +20,7 @@ Kotlin Multiplatform shared core · Compose Multiplatform UI · native hardware 
 
 Build phases and status: [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md). Decisions: [`docs/JOURNAL.md`](docs/JOURNAL.md). Vision: [`docs/VISION.md`](docs/VISION.md).
 
-**Current:** Phase 2 — OLED theme, three-tab shell, PowerGovernor (Android foreground service / iOS background refresh), haptic chords, on top of the Phase 1 core.
+**Current:** Phase 3 — MeshLink BLE Ad-Hoc Network (expect/actual for Android **Current:** Phase 2 — OLED theme, three-tab shell, PowerGovernor (Android foreground service / iOS background refresh), haptic chords, on top of the Phase 1 core. iOS CoreBluetooth, flood routing with TTL decrement, CRDT pin sync, emergency SOS haptics).
 
 ## Screenshots
 
