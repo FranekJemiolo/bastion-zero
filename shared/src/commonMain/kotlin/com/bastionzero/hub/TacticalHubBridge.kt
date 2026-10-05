@@ -51,16 +51,17 @@ class TacticalHubBridge(
      * into a robust LoRa PHY frame with sync word and CRC16.
      */
     fun frameLoRaPacket(payload: ByteArray): ByteArray {
-        val length = payload.size.coerceAtMost(255)
-        val frame = ByteArray(4 + length)
+        val length = payload.size
+        val frame = ByteArray(5 + length)
         // Sync word (0xBA, 0x70)
         frame[0] = 0xBA.toByte()
         frame[1] = 0x70.toByte()
-        frame[2] = length.toByte()
-        payload.copyInto(frame, destinationOffset = 3, startIndex = 0, endIndex = length)
+        frame[2] = ((length ushr 8) and 0xFF).toByte()
+        frame[3] = (length and 0xFF).toByte()
+        payload.copyInto(frame, destinationOffset = 4, startIndex = 0, endIndex = length)
 
         val crc = computeCrc16(payload, length)
-        frame[3 + length] = (crc and 0xFF).toByte()
+        frame[4 + length] = (crc and 0xFF).toByte()
 
         _state.value = _state.value.copy(
             packetsTransmittedLoRa = _state.value.packetsTransmittedLoRa + 1
@@ -72,17 +73,17 @@ class TacticalHubBridge(
      * Validate and unwrap an incoming LoRa PHY frame.
      */
     fun unframeLoRaPacket(frame: ByteArray): ByteArray? {
-        if (frame.size < 4) return null
+        if (frame.size < 5) return null
         if (frame[0] != 0xBA.toByte() || frame[1] != 0x70.toByte()) return null
 
-        val length = frame[2].toInt() and 0xFF
-        if (frame.size < 4 + length) return null
+        val length = ((frame[2].toInt() and 0xFF) shl 8) or (frame[3].toInt() and 0xFF)
+        if (frame.size < 5 + length) return null
 
         val payload = ByteArray(length)
-        frame.copyInto(payload, destinationOffset = 0, startIndex = 3, endIndex = 3 + length)
+        frame.copyInto(payload, destinationOffset = 0, startIndex = 4, endIndex = 4 + length)
 
         val expectedCrc = computeCrc16(payload, length)
-        val receivedCrc = frame[3 + length].toInt() and 0xFF
+        val receivedCrc = frame[4 + length].toInt() and 0xFF
         if (expectedCrc != receivedCrc) return null
 
         _state.value = _state.value.copy(

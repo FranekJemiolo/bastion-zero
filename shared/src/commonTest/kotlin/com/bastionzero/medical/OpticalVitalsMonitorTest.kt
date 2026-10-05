@@ -23,8 +23,8 @@ class OpticalVitalsMonitorTest {
             val cycleStart = currentNs
             while (currentNs - cycleStart < cycleNs) {
                 val progress = ((currentNs - cycleStart).toDouble() / cycleNs) * 2.0 * kotlin.math.PI
-                val red = (0.7 + 0.15 * kotlin.math.sin(progress)).toFloat()
-                val ir = (0.8 + 0.10 * kotlin.math.sin(progress)).toFloat()
+                val red = (0.75 + 0.05 * kotlin.math.sin(progress)).toFloat()
+                val ir = (0.80 + 0.12 * kotlin.math.sin(progress)).toFloat()
 
                 val reading = monitor.processFrame(
                     OpticalVitalsSample(
