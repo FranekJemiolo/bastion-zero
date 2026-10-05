@@ -38,6 +38,6 @@ search:
 SELECT a.id, a.title, a.category, a.body
 FROM WikiArticle a
 WHERE a.id IN (
-    SELECT rowid FROM WikiFts WHERE WikiFts MATCH ?
+    SELECT rowid FROM WikiFts WHERE title MATCH :query OR body MATCH :query
 )
-LIMIT ?;
+LIMIT :limit;
