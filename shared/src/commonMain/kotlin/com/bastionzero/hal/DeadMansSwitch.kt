@@ -163,19 +163,16 @@ class DeadMansSwitch(
         var signatureHex = "UNSIGNED_EMERGENCY"
         if (packetSigner != null) {
             val payloadBytes = preallocatedRamBuffer.copyOf(totalPayloadSize)
-            val packet = SurvivalPacket(
-                packet_id = "deadman-$timestampNs",
-                timestamp = (timestampNs / 1_000_000_000L).coerceAtLeast(1L),
-                sender_id = packetSigner.keyPair.publicKeyHex,
+            val signed = packetSigner.create(
                 type = SurvivalPacket.PacketType.SOS_RESCUE,
-                lat = (cachedLat * 1_000_000).toInt(),
-                lon = (cachedLon * 1_000_000).toInt(),
-                altitude = cachedAltitude.toInt(),
-                payload = payloadBytes.toByteString(),
+                latE6 = (cachedLat * 1_000_000).toInt(),
+                lonE6 = (cachedLon * 1_000_000).toInt(),
+                altitudeDm = (cachedAltitude * 10).toInt(),
+                payload = payloadBytes,
+                wallClockHintSeconds = (timestampNs / 1_000_000_000L).coerceAtLeast(1L),
                 ttl = 15,
             )
-            val signed = packetSigner.sign(packet)
-            signatureHex = signed.signature
+            signatureHex = signed.signature.hex()
         }
 
         // Step 3: Transition to beacon locked and halt execution
