@@ -16,7 +16,7 @@ jobs:
           java-version: 17
       - uses: gradle/actions/setup-gradle@v4
       - name: Shared unit tests (host JVM)
-        run: ./gradlew :shared:testDebugUnitTest
+        run: ./gradlew :shared:testDebugUnitTest --stacktrace
       - name: Assemble debug APK
         run: ./gradlew :androidApp:assembleDebug
       - uses: actions/upload-artifact@v4
