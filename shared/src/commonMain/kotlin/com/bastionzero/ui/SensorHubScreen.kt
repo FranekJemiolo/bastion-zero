@@ -34,7 +34,12 @@ import com.bastionzero.hal.TiltSeverity
 import com.bastionzero.haptics.HapticChord
 import com.bastionzero.haptics.HapticPlayer
 import com.bastionzero.hub.RadiationHazardLevel
+import com.bastionzero.hub.SdrSignalTriangulation
+import com.bastionzero.hub.SolarInsolationOptimizer
 import com.bastionzero.hub.TacticalHubBridge
+import com.bastionzero.medical.OpticalVitalsMonitor
+import com.bastionzero.medical.OpticalVitalsSample
+import com.bastionzero.net.NtnSatelliteMeshBridge
 import com.bastionzero.power.PowerGovernor
 import com.bastionzero.thermal.SurfaceMaterial
 import com.bastionzero.thermal.ThermalImagingEngine
@@ -60,6 +65,10 @@ fun SensorHubScreen(
         traumaLogger = env.traumaLogger,
         thermalEngine = env.thermalEngine,
         tacticalHub = env.tacticalHub,
+        vitalsMonitor = env.vitalsMonitor,
+        solarOptimizer = env.solarOptimizer,
+        sdrTriangulation = env.sdrTriangulation,
+        satelliteBridge = env.satelliteBridge,
         modifier = modifier,
     )
 }
@@ -90,6 +99,10 @@ fun SensorHubContent(
     traumaLogger: com.bastionzero.trauma.KinematicTraumaLogger = remember { com.bastionzero.trauma.KinematicTraumaLogger() },
     thermalEngine: com.bastionzero.thermal.ThermalImagingEngine = remember { com.bastionzero.thermal.ThermalImagingEngine() },
     tacticalHub: com.bastionzero.hub.TacticalHubBridge = remember { com.bastionzero.hub.TacticalHubBridge() },
+    vitalsMonitor: com.bastionzero.medical.OpticalVitalsMonitor = remember { com.bastionzero.medical.OpticalVitalsMonitor() },
+    solarOptimizer: com.bastionzero.hub.SolarInsolationOptimizer = remember { com.bastionzero.hub.SolarInsolationOptimizer() },
+    sdrTriangulation: com.bastionzero.hub.SdrSignalTriangulation = remember { com.bastionzero.hub.SdrSignalTriangulation() },
+    satelliteBridge: com.bastionzero.net.NtnSatelliteMeshBridge = remember { com.bastionzero.net.NtnSatelliteMeshBridge() },
     modifier: Modifier = Modifier,
 ) {
     val inputs by power.inputs.collectAsState()
@@ -102,11 +115,21 @@ fun SensorHubContent(
     val currentSpl by acousticEdgeAI.currentSpl.collectAsState()
     val traumaState by traumaLogger.state.collectAsState()
     val hubState by tacticalHub.state.collectAsState()
+    val vitalsState by vitalsMonitor.state.collectAsState()
+    val satelliteState by satelliteBridge.state.collectAsState()
 
     var selectedThermalMaterial by remember { mutableStateOf(SurfaceMaterial.HUMAN_SKIN) }
     var currentThermalReading by remember {
         mutableStateOf(thermalEngine.calculateTrueTemperature(36.5f, SurfaceMaterial.HUMAN_SKIN))
     }
+
+    var solarCoords by remember {
+        mutableStateOf(solarOptimizer.calculateSolarPosition(52.2f, 172, 12.0f))
+    }
+    var powerRouting by remember {
+        mutableStateOf(solarOptimizer.triagePower(21.0f))
+    }
+    var sdrTarget by remember { mutableStateOf<com.bastionzero.hub.TriangulationTarget?>(null) }
 
     var latestThreat by remember { mutableStateOf<AcousticThreatEvent?>(null) }
     val scope = rememberCoroutineScope()
@@ -401,6 +424,123 @@ fun SensorHubContent(
                 OutlinedButton(
                     onClick = { tacticalHub.resetDose() }
                 ) { Text("RESET DOSE", color = BastionColors.DimRed) }
+            }
+        }
+
+        // 11. Optical Vitals & Photoplethysmography
+        CardBox(title = "OPTICAL VITALS & PPG (CAMERA + FLASH)") {
+            val reading = vitalsState.currentReading
+            if (reading != null) {
+                Text("Pulse Rate: ${reading.heartRateBpm} BPM · SpO2: ${reading.spo2Percent}%",
+                    color = if (reading.status == com.bastionzero.medical.VitalsStatus.NORMAL) BastionColors.Red else BastionColors.Ember,
+                    style = MaterialTheme.typography.titleMedium)
+                Text("Status: ${reading.status} (${(reading.confidence * 100).toInt()}% confidence)")
+                Text(reading.diagnosticSummary, color = BastionColors.DimRed)
+            } else {
+                Text("Vitals Monitor: ${if (vitalsState.isMonitoring) "COLLECTING OPTICAL PULSE..." else "STANDBY"}", color = BastionColors.DimRed)
+            }
+            Text("Processed Frames: ${vitalsState.samplesProcessed} · Signal Quality: ${vitalsState.signalQualityPercent}%", color = BastionColors.DimRed)
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = {
+                        vitalsMonitor.start()
+                        // Feed simulated 75 BPM pulse cycle
+                        val cycleNs = 800_000_000L
+                        var t = 1_000_000_000L
+                        for (i in 0..120) {
+                            val prog = (i * 33_333_333.0 / cycleNs) * 2.0 * kotlin.math.PI
+                            vitalsMonitor.processFrame(
+                                OpticalVitalsSample(
+                                    timestampNs = t,
+                                    redIntensity = (0.7 + 0.15 * kotlin.math.sin(prog)).toFloat(),
+                                    infraredOrGreenIntensity = (0.8 + 0.10 * kotlin.math.sin(prog)).toFloat(),
+                                )
+                            )
+                            t += 33_333_333L
+                        }
+                    }
+                ) { Text("SIMULATE 75 BPM", color = BastionColors.Red) }
+
+                OutlinedButton(
+                    onClick = { vitalsMonitor.reset() }
+                ) { Text("RESET PPG", color = BastionColors.DimRed) }
+            }
+        }
+
+        // 12. AR Solar Insolation & Triage Power
+        CardBox(title = "AR SOLAR INSOLATION & POWER TRIAGE") {
+            Text("Solar Elevation: ${solarCoords.elevationDegrees.formatDecimals(1)}° · Azimuth: ${solarCoords.azimuthDegrees.formatDecimals(1)}°",
+                color = if (solarCoords.isDaylight) BastionColors.Red else BastionColors.DimRed)
+            Text("Daylight: ${if (solarCoords.isDaylight) "ACTIVE DIRECT INSOLATION" else "NIGHT / HORIZON BELOW 0°"}")
+            Text("Solar Input: ${powerRouting.incomingSolarWatts.formatDecimals(1)}W · Optimal Tilt: ${solarOptimizer.calculateOptimalTiltDegrees(52.2f, 172).formatDecimals(1)}°", color = BastionColors.DimRed)
+            Text("Routing: ${powerRouting.primaryAllocatedWatts.formatDecimals(1)}W to ${powerRouting.primaryTargetDevice} (${powerRouting.primaryPercent}%) · ${powerRouting.secondaryAllocatedWatts.formatDecimals(1)}W to ${powerRouting.secondaryTargetDevice} (${powerRouting.secondaryPercent}%)", color = BastionColors.Ember)
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = {
+                        solarCoords = solarOptimizer.calculateSolarPosition(52.2f, 172, 12.0f)
+                        powerRouting = solarOptimizer.triagePower(21.0f)
+                    }
+                ) { Text("NOON 21W", color = BastionColors.Red) }
+
+                OutlinedButton(
+                    onClick = {
+                        solarCoords = solarOptimizer.calculateSolarPosition(52.2f, 172, 17.5f)
+                        powerRouting = solarOptimizer.triagePower(8.5f)
+                    }
+                ) { Text("DUSK 8.5W", color = BastionColors.DimRed) }
+            }
+        }
+
+        // 13. SDR RF Triangulation
+        CardBox(title = "SDR RF SIGNAL TRIANGULATION (406 MHz / LORa)") {
+            val target = sdrTarget
+            if (target != null) {
+                Text("Bearing: ${target.peakAzimuthDeg.formatDecimals(1)}° · Peak RSSI: ${target.peakRssiDbm.formatDecimals(1)} dBm",
+                    color = BastionColors.Red, style = MaterialTheme.typography.titleMedium)
+                Text("Target: ${target.targetType} (${(target.confidence * 100).toInt()}% confidence)")
+                Text("Beamwidth: ±${target.beamwidthDeg.formatDecimals(0)}° directional lobe", color = BastionColors.DimRed)
+            } else {
+                Text("RF Emitter Bearing: SWEEP COMPASS TO TRIANGULATE", color = BastionColors.DimRed)
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = {
+                        sdrTriangulation.clear()
+                        for (az in 0 until 360 step 15) {
+                            val rssi = if (az in 105..135) -45.0f else -95.0f
+                            sdrTriangulation.recordSample(az.toFloat(), rssi, 406.025f)
+                        }
+                        sdrTarget = sdrTriangulation.computeBearing()
+                    }
+                ) { Text("SWEEP 406 MHz BEACON", color = BastionColors.Red) }
+
+                OutlinedButton(
+                    onClick = {
+                        sdrTriangulation.clear()
+                        sdrTarget = null
+                    }
+                ) { Text("CLEAR SDR", color = BastionColors.DimRed) }
+            }
+        }
+
+        // 14. NTN Direct-to-Cell Satellite Bridge
+        CardBox(title = "NTN SATELLITE MESH UPLINK GATEWAY") {
+            Text("Constellation: ${satelliteState.constellationName}")
+            Text("Lock Status: ${satelliteState.status}",
+                color = if (satelliteState.status == com.bastionzero.net.SatelliteLockStatus.UPLINK_SUCCESS) BastionColors.Red else BastionColors.DimRed)
+            Text("Queued Mesh SOS Packets: ${satelliteState.queuedMeshSosPacketsCount} · Uplinked: ${satelliteState.packetsUplinkedTotal}", color = BastionColors.DimRed)
+            Text("Satellite Position: Az ${satelliteState.currentSatelliteAzimuthDeg.formatDecimals(0)}° · El ${satelliteState.currentSatelliteElevationDeg.formatDecimals(0)}°", color = BastionColors.DimRed)
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = {
+                        satelliteBridge.enqueueMeshSosPacket("SOS_VICTIM_GPS_52_21".encodeToByteArray())
+                        satelliteBridge.onSatelliteLockChanged(hasLock = true, elevationDeg = 38.0f, azimuthDeg = 160.0f)
+                    }
+                ) { Text("TRIGGER SATELLITE UPLINK", color = BastionColors.Red) }
             }
         }
     }

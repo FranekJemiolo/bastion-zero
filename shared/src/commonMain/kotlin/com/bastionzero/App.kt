@@ -32,7 +32,15 @@ import com.bastionzero.hal.DeadMansSwitch
 import com.bastionzero.hal.GnssSpoofingDetector
 import com.bastionzero.hal.InertialDeadReckoning
 import com.bastionzero.hal.StructuralTiltMonitor
+import com.bastionzero.hub.SdrSignalTriangulation
+import com.bastionzero.hub.SolarInsolationOptimizer
 import com.bastionzero.hub.TacticalHubBridge
+import com.bastionzero.hub.UsbSerialPeripheralBridge
+import com.bastionzero.medical.OpticalVitalsMonitor
+import com.bastionzero.medical.WoundPhotogrammetry
+import com.bastionzero.net.BluetoothChannelSounding
+import com.bastionzero.net.NtnSatelliteMeshBridge
+import com.bastionzero.rag.EdgeMedicalRag
 import com.bastionzero.thermal.ThermalImagingEngine
 import com.bastionzero.trauma.KinematicTraumaLogger
 
@@ -51,6 +59,14 @@ class AppEnvironment(
     val thermalEngine: ThermalImagingEngine = ThermalImagingEngine(),
     val tacticalHub: TacticalHubBridge = TacticalHubBridge(),
     val ultrasonicModem: UltrasonicModem = UltrasonicModem(),
+    val vitalsMonitor: OpticalVitalsMonitor = OpticalVitalsMonitor(),
+    val woundPhotogrammetry: WoundPhotogrammetry = WoundPhotogrammetry(),
+    val solarOptimizer: SolarInsolationOptimizer = SolarInsolationOptimizer(),
+    val sdrTriangulation: SdrSignalTriangulation = SdrSignalTriangulation(),
+    val usbSerialBridge: UsbSerialPeripheralBridge = UsbSerialPeripheralBridge(),
+    val channelSounding: BluetoothChannelSounding = BluetoothChannelSounding(),
+    val satelliteBridge: NtnSatelliteMeshBridge = NtnSatelliteMeshBridge(),
+    val medicalRag: EdgeMedicalRag = EdgeMedicalRag(),
 )
 
 private enum class Tab(val label: String, val glyph: String) {

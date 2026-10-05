@@ -13,9 +13,9 @@ Repo: `FranekJemiolo/bastion-zero`. Master constraint: **Zero cloud dependencies
 | **Phase 2** | PowerOS & Tactical UI | **Complete** | Pitch-black `#000000` / `#FF3B30` Compose theme, `PowerGovernor` policy engine, Doze mode workarounds, PWM haptic chords. |
 | **Phase 3** | MeshLink Ad-Hoc BLE Mesh | **Complete** | Flood-routing protocol, TTL hop countdown, duplicate signature cache, `expect/actual BluetoothMesh`. |
 | **Phase 4** | Sensor HAL & Edge Intelligence | **Complete** | PDR dead reckoning, Butterworth structural tilt monitor, 5% battery Dead Man's Switch, FFT acoustic threat detection, GNSS anti-spoofing, UWB ranging. |
-| **Phase 5** | Advanced Trauma & Optical Triage | **In Progress** | `KinematicTraumaLogger` (High-G & fall drop height), lock-screen triage string, camera PPG pulse/SpO2 estimation interface, AR wound sizing. |
-| **Phase 6** | Tactical Hub Hardware Expansion | **In Progress** | `TacticalHubBridge` (LoRa PHY framing `0xBA70`), `ThermalImagingEngine` (Stefan-Boltzmann emissivity & scald/camo protection), Geiger counter dosimeter stay-time tracker. |
-| **Phase 7** | Bleeding-Edge Resilient Networks | **Planned** | `UltrasonicModem` (18–22 kHz air-gapped AFSK), Bluetooth 6.0 Channel Sounding, Android 15 NTN satellite mesh uplink, Edge-LLM local RAG. |
+| **Phase 5** | Advanced Trauma & Optical Triage | **Complete** | `KinematicTraumaLogger` (High-G & fall drop height), lock-screen triage string, `OpticalVitalsMonitor` (PPG pulse/SpO2), `WoundPhotogrammetry` (Parkland formula). |
+| **Phase 6** | Tactical Hub Hardware Expansion | **Complete** | `TacticalHubBridge` (LoRa PHY framing `0xBA70`), `ThermalImagingEngine` (Stefan-Boltzmann emissivity & scald/camo protection), Geiger stay-time tracker, `SolarInsolationOptimizer`, `SdrSignalTriangulation`. |
+| **Phase 7** | Bleeding-Edge Resilient Networks | **Complete** | `UltrasonicModem` (18–22 kHz air-gapped AFSK), `BluetoothChannelSounding` (PBR/RTT), `NtnSatelliteMeshBridge` (Android 15 direct-to-cell), `EdgeMedicalRag` on-device triage, `geospatial_stripper.py`. |
 
 ---
 

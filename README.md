@@ -15,13 +15,21 @@ Kotlin Multiplatform shared core · Compose Multiplatform UI · native hardware 
 | Stage | Target | Highlights | Status |
 | --- | --- | --- | --- |
 | 1 · "Burner" MVP | Cheap phones (<$300) | OLED black/red PowerOS, BLE mesh SOS & pins, offline maps + medical wiki, dead reckoning | **Complete** |
-| 2 · Flagship fusion | Modern flagships | Kinematic trauma black-box, optical PPG, GNSS spoofing defense, UWB spatial ranging | **Complete** |
-| 3 · Tactical Hub | + external gear | LoRa multi-mile bridge, LWIR thermal emissivity engine, Geiger counter stay-time tracker | **Complete** |
-| 4 · Bleeding-Edge Networks | Resilient comms | Ultrasonic AFSK modem (air-gapped), Bluetooth 6.0 channel sounding, NTN satellite mesh bridge, Edge-LLM RAG | **In Progress** |
+| 2 · Flagship fusion | Modern flagships | Kinematic trauma black-box, optical PPG, wound photogrammetry, GNSS anti-spoofing, UWB ranging | **Complete** |
+| 3 · Tactical Hub | + external gear | LoRa multi-mile bridge, LWIR thermal emissivity engine, USB-OTG serial HAL, SDR triangulation, solar AR | **Complete** |
+| 4 · Bleeding-Edge Networks | Resilient comms | Ultrasonic AFSK modem (air-gapped), Bluetooth 6.0 channel sounding, Android 15 NTN satellite bridge, on-device Edge-LLM RAG | **Complete** |
 
 Detailed architecture and validation matrix: [`docs/VISION.md`](docs/VISION.md).  
 Step-by-step phases & technical specs: [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md).  
 Development journal & decisions: [`docs/JOURNAL.md`](docs/JOURNAL.md).
+
+## End-to-End (E2E) Disaster Scenario Testing
+
+Bastion Zero includes a dedicated multi-system end-to-end integration test suite (`DisasterScenarioE2ETest.kt`):
+- **Scenario 1 (Trauma & Multi-Hop Relay):** Victim sustained 14G impact and 5m drop -> `KinematicTraumaLogger` formats lock-screen triage -> `OpticalVitalsMonitor` records shock pulse -> signed via Ed25519 & Lamport clock into `SurvivalPacket` -> relayed across multiple BLE hops -> framed into LoRa PHY (`0xBA70` + CRC16) -> decoded by base station.
+- **Scenario 2 (CBRN Contamination & CRDT Sync):** Geiger dosimeter reads 150 $\mu\text{Sv/h}$ -> triggers acute exclusion zone -> drops CRDT hazard pin in `MapPinStore` -> synced across mesh.
+- **Scenario 3 (Subterranean RF Blackout):** Total radio jamming -> `UltrasonicModem` modulates SOS payload into 18–22 kHz AFSK acoustic bursts -> decoded via Goertzel filter.
+- **Scenario 4 (Thermal Scald & Burn Triage):** Shiny metal door handle thermal reflection warning -> soot target patch calibration -> `WoundPhotogrammetry` burn sizing and Parkland fluid resuscitation calculation.
 
 ## Screenshots
 
