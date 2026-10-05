@@ -80,3 +80,12 @@ wire {
     }
     kotlin {}
 }
+
+tasks.withType<Test> {
+    testLogging {
+        events("failed", "standardError")
+        showExceptions = true
+        showCauses = true
+        showStackTraces = true
+    }
+}

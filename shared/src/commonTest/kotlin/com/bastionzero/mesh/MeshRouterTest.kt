@@ -28,6 +28,7 @@ class FakeMeshTransport : MeshTransport {
     val broadcasted = mutableListOf<SurvivalPacket>()
     private val _incoming = MutableSharedFlow<SurvivalPacket>(replay = 16, extraBufferCapacity = 64)
     override val incomingPackets: SharedFlow<SurvivalPacket> = _incoming
+    var onPacket: ((SurvivalPacket) -> Unit)? = null
 
     override val peerCount = MutableStateFlow(1)
     override val isScanning = MutableStateFlow(true)
@@ -42,6 +43,7 @@ class FakeMeshTransport : MeshTransport {
 
     suspend fun simulateIncoming(packet: SurvivalPacket) {
         _incoming.emit(packet)
+        onPacket?.invoke(packet)
     }
 }
 
@@ -94,7 +96,7 @@ class MeshRouterTest {
 
     private fun createRouter(scope: CoroutineScope): MeshRouter {
         val gov = PowerGovernor(FakePowerBackend(), scope)
-        return MeshRouter(
+        val router = MeshRouter(
             transport = transport,
             signer = localSigner,
             validator = validator,
@@ -104,6 +106,8 @@ class MeshRouterTest {
             powerGovernor = gov,
             scope = scope,
         )
+        transport.onPacket = { router.onPacketReceived(it) }
+        return router
     }
 
     @Test
