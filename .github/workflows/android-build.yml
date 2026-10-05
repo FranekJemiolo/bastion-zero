@@ -31,6 +31,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Pre-commit integrity checks
+        run: ./.githooks/pre-commit
       - name: Data pipeline tests
         working-directory: data_pipeline
         run: python -m unittest

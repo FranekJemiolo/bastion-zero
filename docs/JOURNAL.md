@@ -97,3 +97,22 @@ See "Reality-check notes" in [VISION](VISION.md): several brainstorm ideas (DSP 
 ### Known risks / unverified
 - CoreBluetooth delegates in Kotlin/Native require execution on the main queue (`dispatch_get_main_queue()`) or a dedicated dispatch queue.
 - Android foreground service type updated to `specialUse|connectedDevice`. Some Android 14+ OEM ROMs enforce specific connectedDevice use cases.
+
+---
+
+## Phase 4 — Sensor HAL & Edge Intelligence (2026-10-05)
+
+**Status:** Complete. Shared algorithms (Kalman filter PDR, 2nd-order Butterworth tilt filter, 50KB RAM Dead Man's Switch, Cooley-Tukey FFT, GNSS Anti-Spoofing, UWB Spatial Ranging) implemented with native Android SensorManager and iOS CoreMotion drivers.
+
+### Decisions
+
+| # | Decision | Why | Revisit when |
+| - | --- | --- | --- |
+| D42 | `expect class SensorProvider` with `MotionSample` and `EnvironmentalSample` flows + battery thermistor `StateFlow` | Unified hardware abstraction across Android `SensorManager` and iOS `CoreMotion` + `CMAltimeter` | When external USB-OTG sensors are attached |
+| D43 | Pedestrian Dead Reckoning (PDR): Z-axis Peak Detection + 1D Kalman heading fusion | Double-integrating raw accelerometer values drifts to infinity in seconds due to sensor bias. Step-and-heading dead reckoning (SHDR) using peak detection (>1.25 m/s² above gravity) with 250ms refractory period + Kalman gyro/magnetometer fusion guarantees stable displacement tracking | When map-snapping with offline vector road geometry is added |
+| D44 | 2nd-order Butterworth low-pass filter (cutoff 0.2-0.5 Hz) on 3D gravity vectors | Cuts high-frequency structural vibration and human footstep noise to monitor true foundational micro-shifts over hours/days | When adaptive cutoff based on noise variance is needed |
+| D45 | Silicon thermistor temperature drift compensation (0.015°/°C) | MEMS accelerometers exhibit silicon thermal expansion drift between day and night. Subtracting thermistor temperature delta prevents false alarms | When individual per-device temperature calibration curves are stored |
+| D46 | Dead Man's Switch triggers at **5% battery** (not 2%) with pre-allocated 50KB RAM buffer | At 2%, smartphone battery voltage sag causes immediate hard power shutdown during camera/flash initialization and flash writes. Pre-allocating 50KB in RAM eliminates heap/disk I/O | If OEM power management cuts off apps earlier |
+| D47 | Pure Kotlin Cooley-Tukey Radix-2 FFT and hardware decibel gating (>70 dB SPL) | Keeps main CPU in low-power idle until noise exceeds 70 dB SPL. Zero external C/native library dependencies ensures 100% KMP compatibility across Android and iOS | When running deep MobileNet/AST CNNs via NPU/NNAPI |
+| D48 | GNSS Spoofing Detector: AGC spike (>14 dB) & hardware clock drift jump | Terrestrial spoofers emit RF orders of magnitude higher than weak satellites from orbit (~-160 dBW), forcing receiver AGC to spike. Automatically triggers fallback to Inertial Dead Reckoning | When multi-constellation L1+L5 carrier phase verification is added |
+| D49 | Pre-commit validation script `.githooks/pre-commit` | Enforces Zero-Cloud dependencies, checks for conflict markers, private keys, and runs automated data pipeline tests before every commit | Continuous integration gate |

@@ -26,12 +26,23 @@ import com.bastionzero.ui.WikiScreen
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
+import com.bastionzero.hal.AcousticEdgeAI
+import com.bastionzero.hal.DeadMansSwitch
+import com.bastionzero.hal.GnssSpoofingDetector
+import com.bastionzero.hal.InertialDeadReckoning
+import com.bastionzero.hal.StructuralTiltMonitor
+
 /** Everything the shared UI needs from the platform, assembled by each host app. */
 class AppEnvironment(
     val wiki: WikiRepository,
     val power: PowerGovernor,
     val haptics: HapticPlayer,
     val mesh: MeshRouter,
+    val deadReckoning: InertialDeadReckoning = InertialDeadReckoning(),
+    val tiltMonitor: StructuralTiltMonitor = StructuralTiltMonitor(),
+    val deadMansSwitch: DeadMansSwitch = DeadMansSwitch(),
+    val acousticEdgeAI: AcousticEdgeAI = AcousticEdgeAI(),
+    val gnssSpoofing: GnssSpoofingDetector = GnssSpoofingDetector(),
 )
 
 private enum class Tab(val label: String, val glyph: String) {
@@ -74,7 +85,7 @@ fun App(env: AppEnvironment) {
             val m = Modifier.padding(padding)
             when (tab) {
                 Tab.MeshMap -> MeshMapScreen(env.mesh, m)
-                Tab.SensorHub -> SensorHubScreen(env.power, env.haptics, m)
+                Tab.SensorHub -> SensorHubScreen(env, m)
                 Tab.OfflineWiki -> WikiScreen(env.wiki, m)
             }
         }

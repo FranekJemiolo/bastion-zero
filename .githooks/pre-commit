@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -eo pipefail
+
+echo "🛡️  Running Bastion Zero pre-commit validation..."
+
+REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+cd "$REPO_ROOT"
+
+# 1. Check for merge conflict markers in staged files
+echo "  [1/4] Checking for merge conflict markers..."
+CONFLICT_MARKERS=$(git diff --cached --name-only | grep -v "^\.githooks/" | xargs grep -En "(<{7}|={7}|>{7})" 2>/dev/null || true)
+if [ -n "$CONFLICT_MARKERS" ]; then
+    echo "❌ Error: Found merge conflict markers in staged files:"
+    echo "$CONFLICT_MARKERS"
+    exit 1
+fi
+
+# 2. Check for prohibited cloud libraries (Retrofit, Firebase, AWS)
+echo "  [2/4] Enforcing Zero-Cloud dependencies rule..."
+FORBIDDEN_DEPS=$(git diff --cached --name-only | grep -E '\.(kt|kts|gradle)$' | xargs grep -En "(com\.google\.firebase|retrofit2|com\.amazonaws)" 2>/dev/null || true)
+if [ -n "$FORBIDDEN_DEPS" ]; then
+    echo "❌ Error: Forbidden cloud dependency found (Master Rule: Zero Cloud Dependencies):"
+    echo "$FORBIDDEN_DEPS"
+    exit 1
+fi
+
+# 3. Check for committed sensitive secrets / private keys
+echo "  [3/4] Scanning for private key leakage..."
+FORBIDDEN_FILES=$(git diff --cached --name-only | grep -E "(\.pem|\.jks|\.keystore|id_rsa|id_ed25519)$" || true)
+if [ -n "$FORBIDDEN_FILES" ]; then
+    echo "❌ Error: Attempting to commit private key or keystore file:"
+    echo "$FORBIDDEN_FILES"
+    exit 1
+fi
+
+# 4. Run data pipeline unit tests
+echo "  [4/4] Running data pipeline unit tests..."
+if command -v python3 >/dev/null 2>&1; then
+    python3 -m unittest discover -s data_pipeline
+else
+    echo "⚠️ python3 not found, skipping Python pipeline tests"
+fi
+
+echo "✅ All Bastion Zero pre-commit checks PASSED."
+exit 0
