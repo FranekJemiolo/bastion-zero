@@ -17,8 +17,8 @@ class ThermalImagingEngineTest {
             material = SurfaceMaterial.HUMAN_SKIN,
         )
 
-        // Correction is minimal for skin
-        assertTrue(reading.correctedTempCelsius in 35.0f..37.0f)
+        // Correction for skin (0.98 vs 0.95): true surface temp is ~34.1°C for 36.5°C apparent
+        assertTrue(reading.correctedTempCelsius in 33.0f..37.0f)
         assertEquals(false, reading.isScaldHazard)
         assertEquals(false, reading.isMylarCamouflaged)
     }
