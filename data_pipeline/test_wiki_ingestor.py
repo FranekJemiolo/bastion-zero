@@ -19,7 +19,7 @@ class IngestorTest(unittest.TestCase):
             self.assertEqual(build(src, db), 2)
             con = sqlite3.connect(db)
             hits = con.execute(
-                "SELECT a.title, a.category FROM WikiFts JOIN WikiArticle a ON a.id = WikiFts.docid "
+                "SELECT a.title, a.category FROM WikiFts JOIN WikiArticle a ON a.id = WikiFts.rowid "
                 "WHERE WikiFts MATCH 'purif*'"
             ).fetchall()
             self.assertEqual(hits, [("Water purification", "water")])

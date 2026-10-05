@@ -23,7 +23,12 @@ CREATE TABLE IF NOT EXISTS WikiArticle (
     category TEXT NOT NULL,
     body     TEXT NOT NULL
 );
-CREATE VIRTUAL TABLE IF NOT EXISTS WikiFts USING fts4(title, body, tokenize=unicode61);
+CREATE VIRTUAL TABLE IF NOT EXISTS WikiFts USING fts5(
+    title,
+    body,
+    content='WikiArticle',
+    content_rowid='id'
+);
 """
 
 _HEADING = re.compile(r"^#\s+(.+?)\s*$", re.MULTILINE)
@@ -54,9 +59,8 @@ def build(source_dir: Path, out_db: Path) -> int:
                 (i, title, category, body),
             )
             con.execute(
-                "INSERT INTO WikiFts(docid, title, body) VALUES (?,?,?)", (i, title, body)
+                "INSERT INTO WikiFts(rowid, title, body) VALUES (?,?,?)", (i, title, body)
             )
-        con.execute("INSERT INTO WikiFts(WikiFts) VALUES('optimize')")
         con.commit()
         con.execute("VACUUM")
     finally:
