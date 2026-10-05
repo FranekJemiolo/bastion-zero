@@ -77,10 +77,11 @@ class SdrSignalTriangulation(
         val contrastDb = bestAvgRssi - allMean
         val confidence = (contrastDb / 15f).coerceIn(0.1f, 0.99f)
 
+        val freq = readings.firstOrNull()?.frequencyMhz ?: 0f
         val targetType = when {
-            readings.firstOrNull()?.frequencyMhz in 406.0f..406.1f -> "COSPAS-SARSAT Emergency Beacon"
-            readings.firstOrNull()?.frequencyMhz in 121.5f..123.0f -> "Civilian Aircraft SAR Emergency Locator (ELT)"
-            readings.firstOrNull()?.frequencyMhz in 868.0f..928.0f -> "ISM LoRa Node / Drone Video Link"
+            freq in 406.0f..406.1f -> "COSPAS-SARSAT Emergency Beacon"
+            freq in 121.5f..123.0f -> "Civilian Aircraft SAR Emergency Locator (ELT)"
+            freq in 868.0f..928.0f -> "ISM LoRa Node / Drone Video Link"
             else -> "RF Threat / Beacon Emitter"
         }
 
