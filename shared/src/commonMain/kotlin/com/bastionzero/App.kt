@@ -44,6 +44,12 @@ import com.bastionzero.rag.EdgeMedicalRag
 import com.bastionzero.thermal.ThermalImagingEngine
 import com.bastionzero.trauma.KinematicTraumaLogger
 
+import com.bastionzero.airgap.AirgapBundleSync
+import com.bastionzero.crypto.SecureEnclaveKeyManager
+import com.bastionzero.net.UnifiedMeshRouter
+import com.bastionzero.power.AutonomousPowerGovernor
+import com.bastionzero.ui.TacticalFieldHud
+
 /** Everything the shared UI needs from the platform, assembled by each host app. */
 class AppEnvironment(
     val wiki: WikiRepository,
@@ -67,11 +73,16 @@ class AppEnvironment(
     val channelSounding: BluetoothChannelSounding = BluetoothChannelSounding(),
     val satelliteBridge: NtnSatelliteMeshBridge = NtnSatelliteMeshBridge(),
     val medicalRag: EdgeMedicalRag = EdgeMedicalRag(),
+    val unifiedRouter: UnifiedMeshRouter = UnifiedMeshRouter(),
+    val autonomousPower: AutonomousPowerGovernor = AutonomousPowerGovernor(),
+    val enclaveManager: SecureEnclaveKeyManager = SecureEnclaveKeyManager(),
+    val airgapSync: AirgapBundleSync = AirgapBundleSync(),
 )
 
 private enum class Tab(val label: String, val glyph: String) {
     MeshMap("Mesh Map", "◎"),
     SensorHub("Sensor Hub", "⌁"),
+    TacticalHud("Tactical HUD", "⚡"),
     OfflineWiki("Offline Wiki", "☰"),
 }
 
@@ -110,6 +121,7 @@ fun App(env: AppEnvironment) {
             when (tab) {
                 Tab.MeshMap -> MeshMapScreen(env.mesh, m)
                 Tab.SensorHub -> SensorHubScreen(env, m)
+                Tab.TacticalHud -> TacticalFieldHud()
                 Tab.OfflineWiki -> WikiScreen(env.wiki, m)
             }
         }
