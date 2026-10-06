@@ -4,12 +4,21 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Pre-commit integrity checks
+        run: ./.githooks/pre-commit
+      - name: Data pipeline tests
+        working-directory: data_pipeline
+        run: python -m unittest
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -23,16 +32,3 @@ jobs:
         with:
           name: bastion-zero-debug-apk
           path: androidApp/build/outputs/apk/debug/*.apk
-
-  pipeline:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Pre-commit integrity checks
-        run: ./.githooks/pre-commit
-      - name: Data pipeline tests
-        working-directory: data_pipeline
-        run: python -m unittest
