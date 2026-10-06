@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
  * iOS actual implementation of [GnssRawMeasurementIngestor].
  * Graceful fallback adhering to Apple CoreLocation API limitations (no raw AGC or clock bias access).
  */
-actual class GnssRawMeasurementIngestor : GnssRawStream {
+actual class GnssRawMeasurementIngestor() : GnssRawStream {
 
     private val _epochs = MutableSharedFlow<RawGnssEpoch>(extraBufferCapacity = 32)
     actual override val epochs: SharedFlow<RawGnssEpoch> = _epochs.asSharedFlow()
