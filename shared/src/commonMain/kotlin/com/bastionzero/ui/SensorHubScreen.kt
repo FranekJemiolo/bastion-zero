@@ -27,10 +27,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.bastionzero.AppEnvironment
+import com.bastionzero.acoustic.AcousticNeuralClassifier
+import com.bastionzero.acoustic.NeuralClassificationResult
+import com.bastionzero.airgap.AirgapApkBeacon
+import com.bastionzero.airgap.ApkDistributionSession
 import com.bastionzero.hal.AcousticThreatEvent
+import com.bastionzero.hal.GnssRawStream
 import com.bastionzero.hal.MotionSample
 import com.bastionzero.hal.ThreatSignature
 import com.bastionzero.hal.TiltSeverity
+import com.bastionzero.hal.UsbSerialConnection
 import com.bastionzero.haptics.HapticChord
 import com.bastionzero.haptics.HapticPlayer
 import com.bastionzero.hub.RadiationHazardLevel
@@ -39,13 +45,20 @@ import com.bastionzero.hub.SolarInsolationOptimizer
 import com.bastionzero.hub.TacticalHubBridge
 import com.bastionzero.medical.OpticalVitalsMonitor
 import com.bastionzero.medical.OpticalVitalsSample
+import com.bastionzero.net.MeshtasticMeshPacket
+import com.bastionzero.net.MeshtasticProtocolBridge
 import com.bastionzero.net.NtnSatelliteMeshBridge
+import com.bastionzero.net.SlottedRebroadcastSuppression
+import com.bastionzero.net.SlottedRelayDecision
 import com.bastionzero.power.PowerGovernor
+import com.bastionzero.rag.EdgeRagSemanticRouter
+import com.bastionzero.rag.SemanticTriageResponse
 import com.bastionzero.thermal.SurfaceMaterial
 import com.bastionzero.thermal.ThermalImagingEngine
 import com.bastionzero.thermal.ThermalReading
 import com.bastionzero.trauma.KinematicTraumaLogger
 import com.bastionzero.trauma.TraumaSeverity
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -69,6 +82,13 @@ fun SensorHubScreen(
         solarOptimizer = env.solarOptimizer,
         sdrTriangulation = env.sdrTriangulation,
         satelliteBridge = env.satelliteBridge,
+        neuralClassifier = env.neuralClassifier,
+        semanticRouter = env.semanticRouter,
+        apkBeacon = env.apkBeacon,
+        meshtasticBridge = env.meshtasticBridge,
+        slottedSuppression = env.slottedSuppression,
+        usbSerialDriver = env.usbSerialHostDriver,
+        gnssRawIngestor = env.gnssRawIngestor,
         modifier = modifier,
     )
 }
@@ -103,6 +123,13 @@ fun SensorHubContent(
     solarOptimizer: com.bastionzero.hub.SolarInsolationOptimizer = remember { com.bastionzero.hub.SolarInsolationOptimizer() },
     sdrTriangulation: com.bastionzero.hub.SdrSignalTriangulation = remember { com.bastionzero.hub.SdrSignalTriangulation() },
     satelliteBridge: com.bastionzero.net.NtnSatelliteMeshBridge = remember { com.bastionzero.net.NtnSatelliteMeshBridge() },
+    neuralClassifier: AcousticNeuralClassifier = remember { AcousticNeuralClassifier() },
+    semanticRouter: EdgeRagSemanticRouter = remember { EdgeRagSemanticRouter() },
+    apkBeacon: AirgapApkBeacon = remember { AirgapApkBeacon() },
+    meshtasticBridge: MeshtasticProtocolBridge = remember { MeshtasticProtocolBridge() },
+    slottedSuppression: SlottedRebroadcastSuppression = remember { SlottedRebroadcastSuppression() },
+    usbSerialDriver: UsbSerialConnection? = null,
+    gnssRawIngestor: GnssRawStream? = null,
     modifier: Modifier = Modifier,
 ) {
     val inputs by power.inputs.collectAsState()
@@ -130,6 +157,17 @@ fun SensorHubContent(
         mutableStateOf(solarOptimizer.triagePower(21.0f))
     }
     var sdrTarget by remember { mutableStateOf<com.bastionzero.hub.TriangulationTarget?>(null) }
+
+    val isUsbConnected by (usbSerialDriver?.isConnected ?: remember { MutableStateFlow(false) }).collectAsState()
+    val usbDevice by (usbSerialDriver?.connectedDevice ?: remember { MutableStateFlow(null) }).collectAsState()
+    val isGnssListening by (gnssRawIngestor?.isListening ?: remember { MutableStateFlow(false) }).collectAsState()
+
+    var neuralResult by remember { mutableStateOf<NeuralClassificationResult?>(null) }
+    var triageInput by remember { mutableStateOf("Massive bright red blood spurting from upper thigh") }
+    var triageResult by remember { mutableStateOf<SemanticTriageResponse?>(null) }
+    var apkSession by remember { mutableStateOf<ApkDistributionSession?>(null) }
+    var meshtasticSamplePacket by remember { mutableStateOf<MeshtasticMeshPacket?>(null) }
+    var slottedDecision by remember { mutableStateOf<SlottedRelayDecision?>(null) }
 
     var latestThreat by remember { mutableStateOf<AcousticThreatEvent?>(null) }
     val scope = rememberCoroutineScope()
@@ -541,6 +579,168 @@ fun SensorHubContent(
                         satelliteBridge.onSatelliteLockChanged(hasLock = true, elevationDeg = 38.0f, azimuthDeg = 160.0f)
                     }
                 ) { Text("TRIGGER SATELLITE UPLINK", color = BastionColors.Red) }
+            }
+        }
+
+        // 15. Physical USB-C OTG Host Driver & Peripherals
+        CardBox(title = "USB-C OTG SERIAL HOST DRIVER & BUS") {
+            Text("Hardware Link: ${if (isUsbConnected) "CONNECTED" else "NOT CONNECTED"}",
+                color = if (isUsbConnected) BastionColors.Red else BastionColors.DimRed)
+            if (usbDevice != null) {
+                Text("Device: ${usbDevice!!.deviceName}")
+                Text("Chipset: ${usbDevice!!.chipset} (VID: 0x${usbDevice!!.vendorId.toString(16).uppercase()} / PID: 0x${usbDevice!!.productId.toString(16).uppercase()})")
+            } else {
+                Text("Detected Hardware: NONE / VIRTUAL SIMULATOR", color = BastionColors.DimRed)
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = {
+                        usbSerialDriver?.open(115200)
+                    }
+                ) { Text("OPEN SERIAL 115200", color = BastionColors.Red) }
+                OutlinedButton(
+                    onClick = {
+                        usbSerialDriver?.close()
+                    }
+                ) { Text("CLOSE BUS", color = BastionColors.DimRed) }
+            }
+        }
+
+        // 16. Raw GNSS Measurement Ingestion & EW Defense
+        CardBox(title = "RAW GNSS MEASUREMENT EW INGESTION") {
+            Text("Stream Callback: ${if (isGnssListening) "INGESTING SATELLITE SIGNALS" else "IDLE"}",
+                color = if (isGnssListening) BastionColors.Red else BastionColors.DimRed)
+            Text("EW Spoof Status: ${if (gnssReport.isSpoofed) "SPOOF ATTACK DETECTED -> IMU FALLBACK" else "NOMINAL EPHEMERIS"}",
+                color = if (gnssReport.isSpoofed) BastionColors.Red else BastionColors.DimRed)
+            Text("Clock Drift: ${gnssReport.clockDriftNanosPerSec} ns/s · AGC Metric: ${gnssReport.agcLevelDb.formatDecimals(1)} dB", color = BastionColors.DimRed)
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = {
+                        gnssRawIngestor?.startListening()
+                        for (i in 0..15) {
+                            gnssSpoofing.processGnssMeasurement(-10.0f, 180L, 14, i * 1_000_000_000L)
+                        }
+                    }
+                ) { Text("INGEST NOMINAL GNSS", color = BastionColors.Red) }
+                OutlinedButton(
+                    onClick = {
+                        gnssSpoofing.processGnssMeasurement(16.0f, 600_000L, 14, 20_000_000_000L)
+                    }
+                ) { Text("SIMULATE +25dB EW SPOOF", color = BastionColors.Red) }
+            }
+        }
+
+        // 17. Neural Mel-Spectrogram Acoustic Threat Classifier
+        CardBox(title = "NEURAL ACOUSTIC MEL-SPECTROGRAM CLASSIFIER") {
+            if (neuralResult != null) {
+                Text("Detected Class: ${neuralResult!!.predictedClass.name}", color = BastionColors.Red, style = MaterialTheme.typography.titleMedium)
+                Text("Confidence: ${(neuralResult!!.confidence * 100).toInt()}% · Dominant Mel Band: ${neuralResult!!.dominantMelBandHz.toInt()} Hz")
+            } else {
+                Text("Status: READY · 16 MEL FREQUENCY BINS", color = BastionColors.DimRed)
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = {
+                        val melInput = FloatArray(16) { 0.1f }
+                        for (i in 6..11) melInput[i] = 3.5f
+                        neuralResult = neuralClassifier.classify(melInput)
+                    }
+                ) { Text("CLASSIFY GUNSHOT", color = BastionColors.Red) }
+                OutlinedButton(
+                    onClick = {
+                        val melInput = FloatArray(16) { 0.05f }
+                        melInput[0] = 3.2f; melInput[1] = 2.8f
+                        neuralResult = neuralClassifier.classify(melInput)
+                    }
+                ) { Text("CLASSIFY DRONE", color = BastionColors.Red) }
+            }
+        }
+
+        // 18. Edge RAG Natural-Language Field Triage (TCCC)
+        CardBox(title = "SEMANTIC NATURAL-LANGUAGE FIELD TRIAGE (TCCC)") {
+            Text("Distress Query: \"$triageInput\"", color = BastionColors.DimRed)
+            if (triageResult != null) {
+                Text("Urgency: ${triageResult!!.urgencyLevel.name}", color = BastionColors.Red, style = MaterialTheme.typography.titleMedium)
+                Text("Headline: ${triageResult!!.triageHeadline}")
+                triageResult!!.immediateActions.firstOrNull()?.let { act ->
+                    Text("Intervention: ${act.title}", color = BastionColors.Red)
+                    Text("Procedure: ${act.instruction}")
+                }
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = {
+                        triageInput = "Massive bright red blood spurting from upper thigh"
+                        triageResult = semanticRouter.routePanickedQuery(triageInput)
+                    }
+                ) { Text("ARTERIAL BLEED", color = BastionColors.Red) }
+                OutlinedButton(
+                    onClick = {
+                        triageInput = "Sucking hole in chest with severe gasping"
+                        triageResult = semanticRouter.routePanickedQuery(triageInput)
+                    }
+                ) { Text("CHEST HOLE", color = BastionColors.Red) }
+            }
+        }
+
+        // 19. Meshtastic Protocol Interop & Slotted Suppression
+        CardBox(title = "MESHTASTIC PROTOCOL INTEROP & SLOTTED SUPPRESSION") {
+            if (meshtasticSamplePacket != null) {
+                Text("Meshtastic Port: ${meshtasticSamplePacket!!.portNum} (TEXT_APP)")
+                Text("Hop Limit: ${meshtasticSamplePacket!!.hopLimit} · Payload: ${meshtasticSamplePacket!!.payload.decodeToString()}")
+            } else {
+                Text("Status: READY FOR CIVILIAN MESHTASTIC TRANSCODING", color = BastionColors.DimRed)
+            }
+            if (slottedDecision != null) {
+                Text("Slotted Relay Delay: ${slottedDecision!!.slottedDelayMs} ms", color = BastionColors.Red)
+                Text("Decision: ${slottedDecision!!.reason}")
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = {
+                        meshtasticSamplePacket = meshtasticBridge.encodeSurvivalDistressToMeshtastic(
+                            fromNodeId = 0xABCD1234L,
+                            packetId = 1001L,
+                            distressMessage = "SOS: 2 VICTIMS AT RIDGE CREST",
+                        )
+                        val delay = slottedSuppression.computeSlottedDelay(1001L, 0xABCD1234L)
+                        slottedSuppression.recordOverheardPacket(1001L)
+                        val decision = slottedSuppression.evaluateRelayDecision(1001L, 0xABCD1234L)
+                        slottedDecision = decision
+                    }
+                ) { Text("TRANSCODE & SLOTTED DELAY", color = BastionColors.Red) }
+            }
+        }
+
+        // 20. Air-Gapped Direct APK Wi-Fi Direct Distribution
+        CardBox(title = "AIR-GAPPED DIRECT APK BEACON DISTRIBUTION") {
+            if (apkSession != null && apkSession!!.isHosting) {
+                Text("Beacon: ACTIVE (Wi-Fi Hotspot / Direct)", color = BastionColors.Red)
+                Text("SSID: ${apkSession!!.ssid} · Passkey: ${apkSession!!.passkey}")
+                Text("Captive URL: ${apkSession!!.captivePortalUrl}", color = BastionColors.DimRed)
+                Text("Completed Downloads: ${apkSession!!.completedPeerDownloads}", color = BastionColors.Red)
+            } else {
+                Text("Beacon: INACTIVE (Standby)", color = BastionColors.DimRed)
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedButton(
+                    onClick = {
+                        apkSession = apkBeacon.startHostingBeacon("NODE01")
+                    }
+                ) { Text("START APK BEACON", color = BastionColors.Red) }
+                OutlinedButton(
+                    onClick = {
+                        apkBeacon.recordDownloadCompleted()
+                        apkSession = apkSession?.copy(completedPeerDownloads = (apkSession?.completedPeerDownloads ?: 0) + 1)
+                    }
+                ) { Text("SIMULATE PEER DL", color = BastionColors.DimRed) }
+                OutlinedButton(
+                    onClick = {
+                        apkBeacon.stopHosting()
+                        apkSession = null
+                    }
+                ) { Text("STOP", color = BastionColors.DimRed) }
             }
         }
     }

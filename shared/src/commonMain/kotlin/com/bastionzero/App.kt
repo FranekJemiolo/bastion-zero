@@ -129,7 +129,7 @@ fun App(env: AppEnvironment) {
         ) { padding ->
             val m = Modifier.padding(padding)
             when (tab) {
-                Tab.MeshMap -> MeshMapScreen(env.mesh, m)
+                Tab.MeshMap -> MeshMapScreen(env.mesh, env.vectorMapEngine, env.mapSnapping, m)
                 Tab.SensorHub -> SensorHubScreen(env, m)
                 Tab.TacticalHud -> TacticalFieldHud()
                 Tab.OfflineWiki -> WikiScreen(env.wiki, m)

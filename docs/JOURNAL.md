@@ -173,5 +173,6 @@ See "Reality-check notes" in [VISION](VISION.md): several brainstorm ideas (DSP 
 | D71 | `MeshtasticProtocolBridge` & `SlottedRebroadcastSuppression` | Interoperability with global Meshtastic radio networks and elimination of RF broadcast storms | Meshtastic encrypted private channels |
 | D72 | `AirgapApkBeacon`: offline Wi-Fi Direct / Local Hotspot server with QR code metadata | Rapid zero-infrastructure APK distribution to stranded survivors in dead zones | Bluetooth APK beaming |
 | D73 | KMP expect/actual constructor parity and pure Kotlin math | iOS simulator and Android host environments require un-parenthesized common expect class definitions when Android requires Context constructor parameters, and pure Kotlin math (`kotlin.math.PI / 180.0`) avoiding JVM `java.lang.Math` | Kotlin 2.1+ direct constructor expect/actual harmonization |
+| D74 | Tactical UI/UX integration for Phase 7 in `MeshMapScreen` and `SensorHubScreen` | Surfacing real-time vector contours, orthogonal trail snapping, USB host status, live EW spoof detection, neural threat classification, conversational TCCC triage, and air-gapped APK beaming into tactile, glove-friendly Compose Multiplatform cards | Multi-pane tablet layout and WearOS watch faces |
 
 

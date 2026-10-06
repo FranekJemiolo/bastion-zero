@@ -18,19 +18,37 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.bastionzero.crdt.PinKind
 import com.bastionzero.mesh.MeshRouter
+import com.bastionzero.nav.GeoPoint2D
+import com.bastionzero.nav.MapSnappingEngine
+import com.bastionzero.nav.OfflineVectorMapEngine
+import com.bastionzero.nav.SnappedPosition
 import com.bastionzero.proto.SurvivalPacket
 
 @Composable
-fun MeshMapScreen(mesh: MeshRouter, modifier: Modifier = Modifier) {
+fun MeshMapScreen(
+    mesh: MeshRouter,
+    vectorMapEngine: OfflineVectorMapEngine? = null,
+    mapSnapping: MapSnappingEngine? = null,
+    modifier: Modifier = Modifier,
+) {
     val peerCount by mesh.peerCount.collectAsState()
     val pins by mesh.pins.collectAsState()
     val packets by mesh.recentPackets.collectAsState()
+
+    val localVectorEngine = remember(vectorMapEngine) { vectorMapEngine ?: OfflineVectorMapEngine() }
+    val localSnapping = remember(mapSnapping) { mapSnapping ?: MapSnappingEngine() }
+    val rawEstimate = remember { GeoPoint2D(52.22985, 21.01250) }
+    var snappedResult by remember { mutableStateOf<SnappedPosition?>(null) }
+    val nearestShelter = remember(rawEstimate) { localVectorEngine.findNearestShelter(rawEstimate) }
+    val nearestWater = remember(rawEstimate) { localVectorEngine.findNearestWater(rawEstimate) }
 
     Column(
         modifier = modifier.fillMaxSize().padding(16.dp),
@@ -55,6 +73,47 @@ fun MeshMapScreen(mesh: MeshRouter, modifier: Modifier = Modifier) {
                 )
             }
             Text("◎ LIVE", color = BastionColors.Red, style = MaterialTheme.typography.labelMedium)
+        }
+
+        // Offline Vector Terrain & Trail Snapping Card
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .border(1.dp, BastionColors.Ember)
+                .background(BastionColors.Black)
+                .padding(10.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text("OFFLINE VECTOR TERRAIN & SNAPPING", color = BastionColors.Red, style = MaterialTheme.typography.titleSmall)
+                Text("ZERO-CLOUD", color = BastionColors.DimRed, style = MaterialTheme.typography.labelSmall)
+            }
+            if (nearestShelter != null) {
+                Text("Nearest Shelter: ${nearestShelter.name} (${if (nearestShelter.hasWater) "Water ✓" else "Dry"})", color = BastionColors.Red, style = MaterialTheme.typography.bodySmall)
+            }
+            if (nearestWater != null) {
+                Text("Water Source: ${nearestWater.name} (${if (nearestWater.isPotableSource) "Potable ✓" else "Filtration Required"})", color = BastionColors.DimRed, style = MaterialTheme.typography.bodySmall)
+            }
+            if (snappedResult != null) {
+                val distStr = (kotlin.math.round(snappedResult!!.distanceMeters * 10) / 10).toString()
+                Text("Snapped: ${snappedResult!!.snappedTrailName} (Snapping Δ: ${distStr}m)", color = BastionColors.Red, style = MaterialTheme.typography.bodySmall)
+                Text("Bounded Coordinates: ${snappedResult!!.snapped.latitude}, ${snappedResult!!.snapped.longitude}", color = BastionColors.DimRed, style = MaterialTheme.typography.labelSmall)
+            } else {
+                Text("DR Position: ${rawEstimate.latitude}, ${rawEstimate.longitude} (Unsnapped)", color = BastionColors.DimRed, style = MaterialTheme.typography.bodySmall)
+            }
+            OutlinedButton(
+                onClick = {
+                    val terrain = localVectorEngine.getTerrainInBounds(52.0, 53.0, 21.0, 22.0)
+                    snappedResult = localSnapping.snapToNearestTrail(rawEstimate, terrain.trails)
+                },
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("SNAP DR ESTIMATE TO RIDGE TRAIL", color = BastionColors.Red)
+            }
         }
 
         // Emergency action triggers
