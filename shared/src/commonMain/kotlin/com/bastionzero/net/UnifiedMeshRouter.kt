@@ -122,7 +122,7 @@ class UnifiedMeshRouter {
      */
     fun routePacket(packet: SurvivalPacket): RoutingDecision {
         val isEmergency = packet.type == SurvivalPacket.PacketType.SOS_MEDICAL ||
-                packet.type == SurvivalPacket.PacketType.SOS_PANIC
+                packet.type == SurvivalPacket.PacketType.SOS_RESCUE
 
         val activeLinks = links.values.filter { it.isAvailable }
 

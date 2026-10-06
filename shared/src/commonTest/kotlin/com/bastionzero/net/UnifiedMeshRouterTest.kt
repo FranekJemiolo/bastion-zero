@@ -14,7 +14,7 @@ class UnifiedMeshRouterTest {
 
         val samplePacket = SurvivalPacket(
             packetId = 1001L,
-            type = SurvivalPacket.PacketType.CHAT,
+            type = SurvivalPacket.PacketType.PING,
         )
 
         val decision = router.routePacket(samplePacket)
@@ -33,7 +33,7 @@ class UnifiedMeshRouterTest {
 
         val samplePacket = SurvivalPacket(
             packetId = 1002L,
-            type = SurvivalPacket.PacketType.PIN_ADD,
+            type = SurvivalPacket.PacketType.HAZARD_PIN,
         )
 
         val decision = router.routePacket(samplePacket)

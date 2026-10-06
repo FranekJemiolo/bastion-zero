@@ -26,7 +26,7 @@ class Phase5ResilienceE2ETest {
         // 1. Nominal BLE proximity communication
         val normalPacket = SurvivalPacket(
             packetId = 5001L,
-            type = SurvivalPacket.PacketType.CHAT,
+            type = SurvivalPacket.PacketType.PING,
         )
         val decision1 = router.routePacket(normalPacket)
         assertEquals(listOf(TransportTier.BLE_MESH), decision1.selectedTransports)
@@ -37,7 +37,7 @@ class Phase5ResilienceE2ETest {
 
         val pinPacket = SurvivalPacket(
             packetId = 5002L,
-            type = SurvivalPacket.PacketType.PIN_ADD,
+            type = SurvivalPacket.PacketType.HAZARD_PIN,
         )
         val decision2 = router.routePacket(pinPacket)
         assertEquals(listOf(TransportTier.LORA_TACTICAL), decision2.selectedTransports)
@@ -48,7 +48,7 @@ class Phase5ResilienceE2ETest {
 
         val tacticalMsg = SurvivalPacket(
             packetId = 5003L,
-            type = SurvivalPacket.PacketType.TEXT,
+            type = SurvivalPacket.PacketType.RESOURCE_PIN,
         )
         val decision3 = router.routePacket(tacticalMsg)
         assertEquals(listOf(TransportTier.ULTRASONIC_AFSK), decision3.selectedTransports)
