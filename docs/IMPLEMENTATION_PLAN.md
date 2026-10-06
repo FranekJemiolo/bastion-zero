@@ -104,30 +104,17 @@ Repo: `FranekJemiolo/bastion-zero`. Master constraint: **Zero cloud dependencies
 
 ---
 
-## 5. Extended Phase 7 — Bleeding-Edge Resilient Networks
+## 5. Phase 7 — Field Operational Readiness & Tactical Hardware Integration
 
-### 7.1 Ultrasonic Acoustic Modem (`UltrasonicModem.kt`)
-- **Objective:** Air-gapped physical data transfer over high-frequency audio (18 kHz – 22 kHz) when all RF is jammed or blocked underground.
-- **PHY Architecture:**
-  - Audio Frequency Shift Keying (AFSK): Mark tone at 19.5 kHz, Space tone at 18.5 kHz, Sync burst at 20.5 kHz.
-  - Symbol rate: 50–100 baud for echo resistance in caves and tunnels.
-  - Goertzel single-bin DFT detector for energy discrimination at microphone inputs.
-- **Verification:** Tested in `UltrasonicModemTest.kt`.
+*(Detailed plan and architectural specifications: [`PHASE_7_IMPLEMENTATION_PLAN.md`](PHASE_7_IMPLEMENTATION_PLAN.md))*
 
-### 7.2 Bluetooth 6.0 Channel Sounding
-- **Objective:** Democratized centimeter-level spatial localization for budget devices without UWB chips.
-- **Implementation:** Phase-Based Ranging (PBR) and Round-Trip Time (RTT) across 79 Bluetooth channels.
-
-### 7.3 Android 15 NTN Direct-to-Cell Satellite Bridge
-- **Objective:** Automated uplink gateway for the entire local mesh network using native `SatelliteManager` APIs.
-- **Implementation:** Opportunistic queuing of local mesh SOS packets; transmission via 3GPP Rel-17 direct-to-cell satellite bursts.
-
-### 7.4 On-Device Edge-LLM Medical RAG
-- **Objective:** Conversational, panic-resilient medical triage on device without cloud connections.
-- **Architecture:** Quantized SLMs (Gemma 2B Q4 / Llama 3 8B) running via ExecuTorch/MediaPipe on the smartphone NPU.
-
-### 7.5 Dynamic Geospatial Feature Stripping Pipeline
-- **Objective:** Python ETL microservice using `geopandas` and `osmium` to prune non-survival POIs and reduce 2GB regional maps to < 40MB `.mbtiles`.
+- **Physical USB-C OTG Host Serial Driver (`UsbSerialHostDriver.kt`):** Android `UsbManager` bulk endpoints (CDC-ACM, FTDI, CP210x, CH34x) enabling plug-and-play with physical LoRa, SDR, and Geiger peripherals.
+- **Raw GNSS Measurement Ingestion (`GnssRawMeasurementIngestor.kt`):** Hooks into `GnssMeasurementsEvent` streaming real-time AGC (dB) and clock drift into `GnssSpoofingDetector` for mathematical Electronic Warfare defense.
+- **Offline Vector Terrain & Map Snapping (`OfflineVectorMapEngine.kt`, `MapSnappingEngine.kt`):** Zero-cloud offline vector contour elevations, ridge trails, water springs, shelters, and orthogonal point-to-polyline snapping bounding IMU dead reckoning drift.
+- **Neural Acoustic Classifier & Semantic Triage (`AcousticNeuralClassifier.kt`, `EdgeRagSemanticRouter.kt`):** 2-layer quantized mel-spectrogram network classifying gunshots, drone rotors, and cries; paired with natural-language panic triage outputting prioritized TCCC procedures.
+- **Hardware Panic Trigger (`HardwarePanicTrigger.kt`):** 5 rapid physical key clicks within 2.5s for silent, blind SOS triggering without waking screen.
+- **Meshtastic Protocol Interop & Slotted Suppression (`MeshtasticProtocolBridge.kt`, `SlottedRebroadcastSuppression.kt`):** Bidirectional transcoding between Bastion Zero and civilian Meshtastic networks, coupled with slotted jitter delay and duplicate overhearing cancellation.
+- **Air-Gapped APK Distribution (`AirgapApkBeacon.kt`):** Zero-infrastructure Wi-Fi Direct and local hotspot beacon with dense QR pairing metadata for field APK installation in dead zones.
 
 ---
 
