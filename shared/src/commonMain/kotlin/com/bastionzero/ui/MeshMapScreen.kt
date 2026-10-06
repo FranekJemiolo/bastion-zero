@@ -18,6 +18,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -29,7 +30,7 @@ import com.bastionzero.mesh.MeshRouter
 import com.bastionzero.nav.GeoPoint2D
 import com.bastionzero.nav.MapSnappingEngine
 import com.bastionzero.nav.OfflineVectorMapEngine
-import com.bastionzero.nav.SnappedPosition
+import com.bastionzero.nav.SnappingResult
 import com.bastionzero.proto.SurvivalPacket
 
 @Composable
@@ -46,9 +47,16 @@ fun MeshMapScreen(
     val localVectorEngine = remember(vectorMapEngine) { vectorMapEngine ?: OfflineVectorMapEngine() }
     val localSnapping = remember(mapSnapping) { mapSnapping ?: MapSnappingEngine() }
     val rawEstimate = remember { GeoPoint2D(52.22985, 21.01250) }
-    var snappedResult by remember { mutableStateOf<SnappedPosition?>(null) }
-    val nearestShelter = remember(rawEstimate) { localVectorEngine.findNearestShelter(rawEstimate) }
-    val nearestWater = remember(rawEstimate) { localVectorEngine.findNearestWater(rawEstimate) }
+    var snappedResult by remember { mutableStateOf<SnappingResult?>(null) }
+    val terrainViewport = remember { localVectorEngine.queryViewport(48.0, 54.0, 20.0, 24.0) }
+    val nearestShelter = remember(rawEstimate) {
+        terrainViewport.shelters.minByOrNull {
+            OfflineVectorMapEngine.haversineMeters(rawEstimate.latitude, rawEstimate.longitude, it.coordinate.latitude, it.coordinate.longitude)
+        }
+    }
+    val nearestWater = remember(rawEstimate) {
+        localVectorEngine.getNearestWaterSource(rawEstimate.latitude, rawEstimate.longitude)
+    }
 
     Column(
         modifier = modifier.fillMaxSize().padding(16.dp),
@@ -96,19 +104,19 @@ fun MeshMapScreen(
                 Text("Nearest Shelter: ${nearestShelter.name} (${if (nearestShelter.hasWater) "Water ✓" else "Dry"})", color = BastionColors.Red, style = MaterialTheme.typography.bodySmall)
             }
             if (nearestWater != null) {
-                Text("Water Source: ${nearestWater.name} (${if (nearestWater.isPotableSource) "Potable ✓" else "Filtration Required"})", color = BastionColors.DimRed, style = MaterialTheme.typography.bodySmall)
+                Text("Water Source: ${nearestWater.name} (Potable ✓)", color = BastionColors.DimRed, style = MaterialTheme.typography.bodySmall)
             }
-            if (snappedResult != null) {
-                val distStr = (kotlin.math.round(snappedResult!!.distanceMeters * 10) / 10).toString()
-                Text("Snapped: ${snappedResult!!.snappedTrailName} (Snapping Δ: ${distStr}m)", color = BastionColors.Red, style = MaterialTheme.typography.bodySmall)
-                Text("Bounded Coordinates: ${snappedResult!!.snapped.latitude}, ${snappedResult!!.snapped.longitude}", color = BastionColors.DimRed, style = MaterialTheme.typography.labelSmall)
+            val currentSnap = snappedResult
+            if (currentSnap != null) {
+                val distStr = (kotlin.math.round(currentSnap.distanceMeters * 10) / 10).toString()
+                Text("Snapped: ${currentSnap.activeTrailName ?: "Ridge Trail"} (Snapping Δ: ${distStr}m)", color = BastionColors.Red, style = MaterialTheme.typography.bodySmall)
+                Text("Bounded Coordinates: ${currentSnap.snappedCoordinate.latitude}, ${currentSnap.snappedCoordinate.longitude}", color = BastionColors.DimRed, style = MaterialTheme.typography.labelSmall)
             } else {
                 Text("DR Position: ${rawEstimate.latitude}, ${rawEstimate.longitude} (Unsnapped)", color = BastionColors.DimRed, style = MaterialTheme.typography.bodySmall)
             }
             OutlinedButton(
                 onClick = {
-                    val terrain = localVectorEngine.getTerrainInBounds(52.0, 53.0, 21.0, 22.0)
-                    snappedResult = localSnapping.snapToNearestTrail(rawEstimate, terrain.trails)
+                    snappedResult = localSnapping.snapToNearestTrail(rawEstimate, terrainViewport.trails)
                 },
                 modifier = Modifier.fillMaxWidth(),
             ) {
