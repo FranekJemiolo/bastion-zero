@@ -19,9 +19,11 @@ Kotlin Multiplatform shared core · Compose Multiplatform UI · native hardware 
 | 3 · Tactical Hub | + external gear | LoRa multi-mile bridge, LWIR thermal emissivity engine, USB-OTG serial HAL, SDR triangulation, solar AR | **Complete** |
 | 4 · Bleeding-Edge Networks | Resilient comms | Ultrasonic AFSK modem (air-gapped), Bluetooth 6.0 channel sounding, Android 15 NTN satellite bridge, on-device Edge-LLM RAG | **Complete** |
 | 5 · Autonomous Resilience | Field Hardening | Unified multi-transport router, solar-coupled power governor, enclave key sealing, optical QR airgap sync, tactile glove HUD | **Complete** |
+| 6 · Edge Sensor Weaponization | Tactical Operations | Zero-light spatial wireframe navigation, optical water turbidity analyzer, multi-mic TDoA triangulation, celestial compass, SAR transponder, perimeter tripwire | **In Progress** |
 
 Engineering assessment & readiness review: [`docs/ASSESSMENT.md`](docs/ASSESSMENT.md).  
 Phase 5 implementation & hardening specs: [`docs/PHASE_5_IMPLEMENTATION_PLAN.md`](docs/PHASE_5_IMPLEMENTATION_PLAN.md).  
+Phase 6 implementation & tactical edge specs: [`docs/PHASE_6_IMPLEMENTATION_PLAN.md`](docs/PHASE_6_IMPLEMENTATION_PLAN.md).  
 Detailed architecture and validation matrix: [`docs/VISION.md`](docs/VISION.md).  
 Step-by-step phases & technical specs: [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md).  
 Development journal & decisions: [`docs/JOURNAL.md`](docs/JOURNAL.md).

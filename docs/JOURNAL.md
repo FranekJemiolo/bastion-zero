@@ -119,3 +119,37 @@ See "Reality-check notes" in [VISION](VISION.md): several brainstorm ideas (DSP 
 | D50 | SQLite Linker flag (`-lsqlite3`) for iOS framework & Xcode application | SQLDelight native driver (SQLiter) references `_sqlite3_step` from Apple's system SQLite. Adding `linkerOpts("-lsqlite3")` and `-lsqlite3` resolves simulator architecture link errors | — |
 | D51 | Pure Kotlin `formatDecimals` in shared UI (`SensorHubScreen`) | JVM `String.format` is unavailable in Kotlin/Native. Multiplatform math rounding helper preserves zero JVM dependencies across all screens | When official Compose Multiplatform string formatting is stabilized |
 | D52 | XcodeGen project `objectVersion: 56` (Xcode 15 compatibility) | XcodeGen by default emits Xcode 16 format (77). Normalizing to 56 enables seamless compilation across macOS CI runners running Xcode 15 and 16 | — |
+
+---
+
+## Phase 5 — Autonomous Resilience & Field Hardening (2026-10-06)
+
+**Status:** Complete & Verified. All CI pipelines (Android, iOS, Docs) 100% green.
+
+### Decisions
+
+| # | Decision | Why | Revisit when |
+| - | --- | --- | --- |
+| D53 | `UnifiedMeshRouter`: Tiered transport arbitration (BLE $\to$ LoRa $\to$ Ultrasonic $\to$ NTN Satellite) | Transparent failover across all physical channels with concurrent multi-link broadcast for `SOS_MEDICAL` | Dynamic routing based on mesh link cost metrics |
+| D54 | `AutonomousPowerGovernor`: Solar-coupled power regulation | Dynamic sensor throttling (IMU 100Hz $\to$ 20Hz, Camera 30 $\to$ 10 FPS, OLED 10% red) and solar harvest reserve estimation | Real MPPT hardware controllers |
+| D55 | `SecureEnclaveKeyManager`: Key sealing & zeroize | In-memory and enclave key generation, X25519 ECDH shared secret agreement, and zero-fill memory sanitization on emergency wipe | Platform StrongBox hardware hooks |
+| D56 | `AirgapBundleSync`: Chunked animated QR sync | RF-silent optical exchange of CRDT pins and emergency bundles under Electronic Warfare jamming | Fountain codes (e.g. Luby Transform) |
+| D57 | `TacticalFieldHud`: 64dp+ oversized touch targets | Rain and heavy tactical glove usability with high-contrast night-vision red palette | Secondary physical button bindings |
+
+---
+
+## Phase 6 — Tactical Autonomous Edge Capabilities & Sensor Weaponization (2026-10-06)
+
+**Status:** Planning Approved; Scaffolding & Implementation in progress.
+
+### Decisions
+
+| # | Decision | Why | Revisit when |
+| - | --- | --- | --- |
+| D58 | `ZeroLightSpatialMapper`: 2.5D wireframe room & corridor mapping | Pitch-black navigation without flashlight emissions that expose position or drain battery | Direct ARKit / ARCore LiDAR mesh point-cloud streaming |
+| D59 | `WaterTurbidityAnalyzer`: Screen lux to sensor optical scattering | Rapid field water potability assessment (NTU calculation) and filtration/boiling/UV triage | Dual-wavelength optical refraction |
+| D60 | `AcousticTriangulationEngine`: Multi-mic TDoA cross-correlation with temperature compensation | Locates origin bearing ($\theta$) and elevation ($\phi$) of gunshots, drone rotors, and survivor cries | 4-mic tetrahedral microphone arrays |
+| D61 | `CelestialCompassEngine`: Astronomical Solar & Polaris ephemeris calculation | Unjammable optical heading reference when GNSS is jammed/spoofed and magnetometers suffer metal interference | Real-time camera celestial overlay |
+| D62 | `SarGhostTransponder`: Controlled low-duty-cycle cellular RF bursts | Creates detectable electromagnetic breadcrumbs for airborne SAR transponders with strict battery/thermal safety gates | SDR-based emergency cellular simulation |
+| D63 | `PerimeterDefenseCoordinator`: Distributed multi-node tripwire fence | Correlates acoustic alerts, seismic shifts, and dosimeter breaches across mesh nodes to trigger squad-wide tactical alarms | Automated perimeter sensor mesh pairing |
+
