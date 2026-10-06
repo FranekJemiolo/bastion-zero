@@ -94,10 +94,11 @@ class ZeroLightSpatialMapper(
             )
         }
 
-        // 1. Estimate floor plane Z (median of lowest 20% of points)
-        val sortedZ = points.map { it.z }.sorted()
-        val floorSampleCount = max(1, (sortedZ.size * 0.20f).toInt())
-        val floorPlaneZ = sortedZ.take(floorSampleCount).average().toFloat()
+        // 1. Estimate floor plane Z (median of points near the observer)
+        val nearPoints = points.filter { sqrt(it.x * it.x + it.y * it.y) <= 1.5f }
+        val samplePoints = if (nearPoints.isNotEmpty()) nearPoints else points
+        val sortedZ = samplePoints.map { it.z }.sorted()
+        val floorPlaneZ = sortedZ.getOrNull(sortedZ.size / 2) ?: 0f
 
         // 2. Identify obstacles and drop-offs
         val obstaclePoints = mutableListOf<SpatialPoint3D>()
