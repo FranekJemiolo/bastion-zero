@@ -191,6 +191,12 @@ Test the decentralized mesh protocol directly in your browser. Watch Lamport log
 | **CRDT Map Sync** | LWW-Element-Set (Last-Write-Wins) with Grow-Only Confirmations | LWW-Element-Set (Last-Write-Wins) with Grow-Only Confirmations | Peer-to-peer conflict resolution for crowd-sourced hazard and resource pins |
 | **Offline Knowledge** | SQLDelight SQLite with FTS4 Full-Text Search | SQLDelight Native SQLite with FTS4 Full-Text Search | Zero-network medical &amp; trauma wikis pre-ingested via Python data pipeline |
 | **Power Management** | Sticky Foreground Service, timed WakeLocks, `TYPE_SIGNIFICANT_MOTION` | `BGTaskScheduler` periodic refresh &amp; battery notification hooks | Dynamic hardware throttling: 60Hz down to 10Hz, GPS intervals from 1s to 10min |
+| **Zero-Light Spatial Mapping** | Infrared LiDAR / Time-of-Flight depth point-cloud segmentation | ARKit LiDAR depth mesh extraction | RANSAC floor-plane extraction, pitfall drop-off alarms, 2.5D wireframe corridor navigation without visible light |
+| **Optical Water Turbidity** | Screen lux emitter to ambient sensor / camera receptor ratio | Display emitter to camera optical luminance attenuation | $T = I / I_0$ optical transmittance calculating NTU potability and field purification triage (UV / filter / boil) |
+| **Acoustic Triangulation** | Multi-mic array (Top + Bottom stereo pair) audio capture | Multi-mic array audio capture | Time Difference of Arrival (TDoA) cross-correlation with temperature-compensated sonic speed $c(T)$ vectoring gunshots/rotors |
+| **Celestial Navigation** | Solar &amp; Polaris ephemeris calculation | Solar &amp; Polaris ephemeris calculation | Unjammable astronomical heading reference and shadow-stick alignment detecting magnetic compass distortion |
+| **SAR Ghost Transponder** | Controlled cellular emergency burst scheduler | Controlled emergency connection bursts | Ultra-low-duty-cycle RF breadcrumbs (+23 dBm) for airborne SAR receivers with battery (>5%) &amp; thermal (<45°C) gates |
+| **Perimeter Tripwire Coordinator** | Multi-node BLE/LoRa tripwire sensor event mesh | Multi-node BLE tripwire sensor event mesh | Correlated multi-sensor threat escalation (Acoustic, Seismic Tilt, Radiation) dispatching squad-wide tactical alerts |
 
 ---
 

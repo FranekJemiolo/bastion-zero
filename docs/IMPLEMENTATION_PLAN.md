@@ -12,10 +12,9 @@ Repo: `FranekJemiolo/bastion-zero`. Master constraint: **Zero cloud dependencies
 | **Phase 1** | KMP Scaffolding & Shared Data Core | **Complete** | Protobuf `SurvivalPacket`, Lamport logical clock, Ed25519 signing, LWW-Element-Set CRDT, SQLDelight offline wiki. |
 | **Phase 2** | PowerOS & Tactical UI | **Complete** | Pitch-black `#000000` / `#FF3B30` Compose theme, `PowerGovernor` policy engine, Doze mode workarounds, PWM haptic chords. |
 | **Phase 3** | MeshLink Ad-Hoc BLE Mesh | **Complete** | Flood-routing protocol, TTL hop countdown, duplicate signature cache, `expect/actual BluetoothMesh`. |
-| **Phase 4** | Sensor HAL & Edge Intelligence | **Complete** | PDR dead reckoning, Butterworth structural tilt monitor, 5% battery Dead Man's Switch, FFT acoustic threat detection, GNSS anti-spoofing, UWB ranging. |
-| **Phase 5** | Advanced Trauma & Optical Triage | **Complete** | `KinematicTraumaLogger` (High-G & fall drop height), lock-screen triage string, `OpticalVitalsMonitor` (PPG pulse/SpO2), `WoundPhotogrammetry` (Parkland formula). |
-| **Phase 6** | Tactical Hub Hardware Expansion | **Complete** | `TacticalHubBridge` (LoRa PHY framing `0xBA70`), `ThermalImagingEngine` (Stefan-Boltzmann emissivity & scald/camo protection), Geiger stay-time tracker, `SolarInsolationOptimizer`, `SdrSignalTriangulation`. |
-| **Phase 7** | Bleeding-Edge Resilient Networks | **Complete** | `UltrasonicModem` (18–22 kHz air-gapped AFSK), `BluetoothChannelSounding` (PBR/RTT), `NtnSatelliteMeshBridge` (Android 15 direct-to-cell), `EdgeMedicalRag` on-device triage, `geospatial_stripper.py`. |
+| **Phase 4** | Sensor HAL & Edge Intelligence | **Complete** | PDR dead reckoning, Butterworth structural tilt monitor, 5% battery Dead Man's Switch, FFT acoustic threat detection, GNSS anti-spoofing, UWB ranging, trauma black-box, optical PPG, LoRa PHY, ultrasonic modem. |
+| **Phase 5** | Autonomous Resilience & Field Hardening | **Complete** | `UnifiedMeshRouter` multi-transport arbitrator, `AutonomousPowerGovernor` solar coupling, `SecureEnclaveKeyManager`, `AirgapBundleSync` animated QR stream, `TacticalFieldHud` glove mode. |
+| **Phase 6** | Tactical Edge Sensor Weaponization | **Complete** | `ZeroLightSpatialMapper` wireframe navigation, `WaterTurbidityAnalyzer` optical NTU potability, `AcousticTriangulationEngine` multi-mic TDoA, `CelestialCompassEngine` unjammable nav, `SarGhostTransponder`, `PerimeterDefenseCoordinator`. |
 
 ---
 
