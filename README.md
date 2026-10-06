@@ -39,7 +39,11 @@ Bastion Zero includes two dedicated multi-system end-to-end integration test sui
 
 ## Screenshots
 
-Screenshots will be added once the UI is verified on a device.
+| Tactical Mesh Map & Dead Reckoning | Hardware Sensor Hub & Optical PPG |
+| :---: | :---: |
+| [![Tactical Mesh Map](docs/assets/images/screenshot_mesh_map.jpg)](docs/assets/images/screenshot_mesh_map.jpg)<br><sub>**Mesh Map & Vector Terrain:** P2P BLE mesh tracking, inertial dead-reckoning breadcrumbs, and CRDT hazard pins.</sub> | [![Hardware Sensor Hub](docs/assets/images/screenshot_sensor_hub.jpg)](docs/assets/images/screenshot_sensor_hub.jpg)<br><sub>**Sensor Hub & Optical PPG:** Real-time pulse waveform, Kinematic Trauma black-box, and Geiger dosimeter bridge.</sub> |
+| **Tactical Field HUD (Glove Mode)** | **Offline Emergency Medical & TCCC Wiki** |
+| [![Tactical Field HUD](docs/assets/images/screenshot_tactical_hud.jpg)](docs/assets/images/screenshot_tactical_hud.jpg)<br><sub>**Tactical Field HUD:** Pure #000000 OLED night-vision red monochrome UI with 64dp high-contrast touch targets.</sub> | [![Offline Medical Wiki](docs/assets/images/screenshot_offline_wiki.jpg)](docs/assets/images/screenshot_offline_wiki.jpg)<br><sub>**Offline Medical Wiki:** SQLite FTS4 indexed TCCC trauma protocols, tourniquet guide, and Parkland burn calculator.</sub> |
 
 ## Layout
 

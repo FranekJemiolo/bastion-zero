@@ -110,6 +110,78 @@ Test the decentralized mesh protocol directly in your browser. Watch Lamport log
 
 ---
 
+## 📱 APPLICATION INTERFACE & TACTICAL VIEWS
+
+<div class="tactical-grid">
+
+  <div class="tactical-card">
+    <div class="tactical-image-frame" style="margin: -18px -18px 12px -18px; border-radius: 3px 3px 0 0;">
+      <a href="assets/images/screenshot_mesh_map.jpg" target="_blank">
+        <img src="assets/images/screenshot_mesh_map.jpg" alt="Tactical Mesh Map Screen" />
+      </a>
+    </div>
+    <h4>🗺️ Tactical Mesh Map</h4>
+    <p>
+      Air-gapped offline vector terrain with P2P BLE mesh tracking, real-time dead-reckoning trajectory breadcrumbs, and CRDT hazard/resource pins.
+    </p>
+    <div>
+      <span class="tactical-badge badge-green">P2P MESH</span>
+      <span class="tactical-badge badge-amber">CRDT SYNC</span>
+    </div>
+  </div>
+
+  <div class="tactical-card">
+    <div class="tactical-image-frame" style="margin: -18px -18px 12px -18px; border-radius: 3px 3px 0 0;">
+      <a href="assets/images/screenshot_sensor_hub.jpg" target="_blank">
+        <img src="assets/images/screenshot_sensor_hub.jpg" alt="Hardware Sensor Hub Screen" />
+      </a>
+    </div>
+    <h4>📡 Hardware Sensor Hub</h4>
+    <p>
+      Optical camera PPG pulse waveform telemetry, Kinematic Trauma impact black-box, and Geiger dosimeter serial bridge with acute exclusion zones.
+    </p>
+    <div>
+      <span class="tactical-badge badge-red">OPTICAL PPG</span>
+      <span class="tactical-badge badge-amber">GEIGER HAL</span>
+    </div>
+  </div>
+
+  <div class="tactical-card">
+    <div class="tactical-image-frame" style="margin: -18px -18px 12px -18px; border-radius: 3px 3px 0 0;">
+      <a href="assets/images/screenshot_tactical_hud.jpg" target="_blank">
+        <img src="assets/images/screenshot_tactical_hud.jpg" alt="Tactical Field HUD Glove Mode Screen" />
+      </a>
+    </div>
+    <h4>🔴 Tactical Field HUD</h4>
+    <p>
+      Pure #000000 OLED night-vision red monochrome interface designed for high-stress operation, complete with 64dp glove-friendly touch targets.
+    </p>
+    <div>
+      <span class="tactical-badge badge-red">OLED ZERO PIXELS</span>
+      <span class="tactical-badge badge-green">GLOVE MODE</span>
+    </div>
+  </div>
+
+  <div class="tactical-card">
+    <div class="tactical-image-frame" style="margin: -18px -18px 12px -18px; border-radius: 3px 3px 0 0;">
+      <a href="assets/images/screenshot_offline_wiki.jpg" target="_blank">
+        <img src="assets/images/screenshot_offline_wiki.jpg" alt="Offline Emergency Medical Wiki Screen" />
+      </a>
+    </div>
+    <h4>🏥 Offline TCCC &amp; Medical Wiki</h4>
+    <p>
+      Zero-network SQLite FTS4 indexed emergency trauma library with tourniquet application guides, burn Parkland fluid calculators, and wilderness survival guides.
+    </p>
+    <div>
+      <span class="tactical-badge badge-green">SQLDELIGHT FTS4</span>
+      <span class="tactical-badge badge-red">TCCC PROTOCOLS</span>
+    </div>
+  </div>
+
+</div>
+
+---
+
 ## 🛡️ MISSION-CRITICAL ARCHITECTURE MATRIX
 
 | Subsystem | Android Implementation | iOS Implementation | Edge-Compute Principle |
