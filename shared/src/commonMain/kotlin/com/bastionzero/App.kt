@@ -77,6 +77,16 @@ class AppEnvironment(
     val autonomousPower: AutonomousPowerGovernor = AutonomousPowerGovernor(),
     val enclaveManager: SecureEnclaveKeyManager = SecureEnclaveKeyManager(),
     val airgapSync: AirgapBundleSync = AirgapBundleSync(),
+    val vectorMapEngine: com.bastionzero.nav.OfflineVectorMapEngine = com.bastionzero.nav.OfflineVectorMapEngine(),
+    val mapSnapping: com.bastionzero.nav.MapSnappingEngine = com.bastionzero.nav.MapSnappingEngine(),
+    val neuralClassifier: com.bastionzero.acoustic.AcousticNeuralClassifier = com.bastionzero.acoustic.AcousticNeuralClassifier(),
+    val semanticRouter: com.bastionzero.rag.EdgeRagSemanticRouter = com.bastionzero.rag.EdgeRagSemanticRouter(),
+    val panicTrigger: com.bastionzero.hal.HardwarePanicTrigger = com.bastionzero.hal.HardwarePanicTrigger(),
+    val meshtasticBridge: com.bastionzero.net.MeshtasticProtocolBridge = com.bastionzero.net.MeshtasticProtocolBridge(),
+    val slottedSuppression: com.bastionzero.net.SlottedRebroadcastSuppression = com.bastionzero.net.SlottedRebroadcastSuppression(),
+    val apkBeacon: com.bastionzero.airgap.AirgapApkBeacon = com.bastionzero.airgap.AirgapApkBeacon(),
+    val usbSerialHostDriver: com.bastionzero.hal.UsbSerialHostDriver = com.bastionzero.hal.UsbSerialHostDriver(),
+    val gnssRawIngestor: com.bastionzero.hal.GnssRawMeasurementIngestor = com.bastionzero.hal.GnssRawMeasurementIngestor(),
 )
 
 private enum class Tab(val label: String, val glyph: String) {

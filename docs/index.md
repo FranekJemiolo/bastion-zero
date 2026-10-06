@@ -197,6 +197,11 @@ Test the decentralized mesh protocol directly in your browser. Watch Lamport log
 | **Celestial Navigation** | Solar &amp; Polaris ephemeris calculation | Solar &amp; Polaris ephemeris calculation | Unjammable astronomical heading reference and shadow-stick alignment detecting magnetic compass distortion |
 | **SAR Ghost Transponder** | Controlled cellular emergency burst scheduler | Controlled emergency connection bursts | Ultra-low-duty-cycle RF breadcrumbs (+23 dBm) for airborne SAR receivers with battery (>5%) &amp; thermal (<45°C) gates |
 | **Perimeter Tripwire Coordinator** | Multi-node BLE/LoRa tripwire sensor event mesh | Multi-node BLE tripwire sensor event mesh | Correlated multi-sensor threat escalation (Acoustic, Seismic Tilt, Radiation) dispatching squad-wide tactical alerts |
+| **USB-C OTG Serial Host** | `UsbManager` bulk transfer endpoints (CDC-ACM, FTDI, CP210x, CH34x) | Sandboxed MFi / Simulated external bridge | Direct plug-and-play with external LoRa transceivers, RTL-SDR dongles, and Geiger dosimeters |
+| **Raw GNSS Measurement Ingestion** | `GnssMeasurementsEvent.Callback` streaming AGC (dB) and clock drift | CoreLocation integrity fallback | Real-time electronic warfare &amp; terrestrial GPS spoofing detection triggering dead-reckoning fallback |
+| **Offline Vector Map &amp; Snapping** | Compose Multiplatform vector path canvas with orthogonal trail snapping | Compose Multiplatform vector path canvas with orthogonal trail snapping | Zero-cloud topographic contour lines and trail snapping bounding long-term dead reckoning IMU drift |
+| **Neural Acoustic Triage &amp; Semantic RAG** | 2-layer quantized mel-spectrogram network + TCCC intent router | 2-layer quantized mel-spectrogram network + TCCC intent router | Real-time classification of rotor/gunshot threats and instant natural-language panic casualty triage |
+| **Meshtastic Interop &amp; Airgap APK** | Meshtastic Protobuf transcoding + Wi-Fi Direct APK beacon | Meshtastic Protobuf transcoding + Wi-Fi Direct APK beacon | Seamless interoperability with civilian LoRa networks and zero-infrastructure peer-to-peer APK beaming |
 
 ---
 

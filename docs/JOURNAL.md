@@ -140,7 +140,7 @@ See "Reality-check notes" in [VISION](VISION.md): several brainstorm ideas (DSP 
 
 ## Phase 6 — Tactical Autonomous Edge Capabilities & Sensor Weaponization (2026-10-06)
 
-**Status:** Planning Approved; Scaffolding & Implementation in progress.
+**Status:** Complete & Verified. All CI pipelines green.
 
 ### Decisions
 
@@ -152,4 +152,25 @@ See "Reality-check notes" in [VISION](VISION.md): several brainstorm ideas (DSP 
 | D61 | `CelestialCompassEngine`: Astronomical Solar & Polaris ephemeris calculation | Unjammable optical heading reference when GNSS is jammed/spoofed and magnetometers suffer metal interference | Real-time camera celestial overlay |
 | D62 | `SarGhostTransponder`: Controlled low-duty-cycle cellular RF bursts | Creates detectable electromagnetic breadcrumbs for airborne SAR transponders with strict battery/thermal safety gates | SDR-based emergency cellular simulation |
 | D63 | `PerimeterDefenseCoordinator`: Distributed multi-node tripwire fence | Correlates acoustic alerts, seismic shifts, and dosimeter breaches across mesh nodes to trigger squad-wide tactical alarms | Automated perimeter sensor mesh pairing |
+
+---
+
+## Phase 7 — Field Operational Readiness & Tactical Hardware Integration (2026-10-06)
+
+**Status:** Complete & Verified. Physical USB-C OTG drivers, raw GNSS ingestion, offline vector terrain, map snapping, neural acoustic triage, hardware panic triggers, Meshtastic interop, and airgap APK distribution implemented.
+
+### Decisions
+
+| # | Decision | Why | Revisit when |
+| - | --- | --- | --- |
+| D64 | `UsbSerialHostDriver` expect/actual with CDC-ACM, FTDI, CP210x, CH34x bulk transfer | Direct plug-and-play communication with external LoRa, SDR, and Geiger USB-C hardware on Android | iOS external accessory MFi protocol expansion |
+| D65 | `GnssRawMeasurementIngestor` expect/actual streaming live AGC (dB) and clock drift | Hardware-level mathematical electronic warfare and GPS spoofer detection | Carrier phase L1/L5 carrier-to-noise ratio fusion |
+| D66 | `OfflineVectorMapEngine`: zero-cloud bundled contour elevations, trails, streams, shelters | Zero-infrastructure spatial awareness and water location without remote tile servers | Dynamic .mbtiles SQLite decompression |
+| D67 | `MapSnappingEngine`: orthogonal point-to-polyline projection with 25-30m threshold | Bounds long-term dead reckoning Kalman drift by snapping trajectory to real ridge paths | Multi-modal elevation profile elevation matching |
+| D68 | `AcousticNeuralClassifier`: 2-layer quantized neural network over 16-channel mel spectrograms | Edge AI classification of gunshots, drone rotors, and screams without cloud inference | Deep AST / CNN quantization via NPU/NNAPI |
+| D69 | `EdgeRagSemanticRouter`: conversational natural-language triage with prioritized TCCC actions | Panicked survivors dictate unstructured text/voice and receive instant life-saving triage steps | On-device Gemma 2B quantized execution |
+| D70 | `HardwarePanicTrigger`: 5 rapid clicks within 2.5s window | Blind silent emergency SOS triggering without waking screen or illuminating OLED | Lockscreen live activities |
+| D71 | `MeshtasticProtocolBridge` & `SlottedRebroadcastSuppression` | Interoperability with global Meshtastic radio networks and elimination of RF broadcast storms | Meshtastic encrypted private channels |
+| D72 | `AirgapApkBeacon`: offline Wi-Fi Direct / Local Hotspot server with QR code metadata | Rapid zero-infrastructure APK distribution to stranded survivors in dead zones | Bluetooth APK beaming |
+
 

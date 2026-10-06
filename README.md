@@ -20,17 +20,19 @@ Kotlin Multiplatform shared core · Compose Multiplatform UI · native hardware 
 | 4 · Bleeding-Edge Networks | Resilient comms | Ultrasonic AFSK modem (air-gapped), Bluetooth 6.0 channel sounding, Android 15 NTN satellite bridge, on-device Edge-LLM RAG | **Complete** |
 | 5 · Autonomous Resilience | Field Hardening | Unified multi-transport router, solar-coupled power governor, enclave key sealing, optical QR airgap sync, tactile glove HUD | **Complete** |
 | 6 · Edge Sensor Weaponization | Tactical Operations | Zero-light spatial wireframe navigation, optical water turbidity analyzer, multi-mic TDoA triangulation, celestial compass, SAR transponder, perimeter tripwire | **Complete** |
+| 7 · Operational Readiness | Field Deployment | Physical USB-C OTG drivers, raw GNSS ingestion, offline vector terrain & map snapping, neural acoustic triage, volume panic triggers, Meshtastic LoRa bridge, air-gapped APK beam | **Complete** |
 
 Engineering assessment & readiness review: [`docs/ASSESSMENT.md`](docs/ASSESSMENT.md).  
 Phase 5 implementation & hardening specs: [`docs/PHASE_5_IMPLEMENTATION_PLAN.md`](docs/PHASE_5_IMPLEMENTATION_PLAN.md).  
 Phase 6 implementation & tactical edge specs: [`docs/PHASE_6_IMPLEMENTATION_PLAN.md`](docs/PHASE_6_IMPLEMENTATION_PLAN.md).  
+Phase 7 implementation & operational readiness specs: [`docs/PHASE_7_IMPLEMENTATION_PLAN.md`](docs/PHASE_7_IMPLEMENTATION_PLAN.md).  
 Detailed architecture and validation matrix: [`docs/VISION.md`](docs/VISION.md).  
 Step-by-step phases & technical specs: [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md).  
 Development journal & decisions: [`docs/JOURNAL.md`](docs/JOURNAL.md).
 
 ## End-to-End (E2E) Disaster Scenario Testing
 
-Bastion Zero includes three dedicated multi-system end-to-end integration test suites (`DisasterScenarioE2ETest.kt`, `Phase5ResilienceE2ETest.kt`, and `Phase6TacticalE2ETest.kt`):
+Bastion Zero includes four dedicated multi-system end-to-end integration test suites (`DisasterScenarioE2ETest.kt`, `Phase5ResilienceE2ETest.kt`, `Phase6TacticalE2ETest.kt`, and `Phase7OperationalE2ETest.kt`):
 - **Scenario 1 (Trauma & Multi-Hop Relay):** Victim sustained 14G impact and 5m drop -> `KinematicTraumaLogger` formats lock-screen triage -> `OpticalVitalsMonitor` records shock pulse -> signed via Ed25519 & Lamport clock into `SurvivalPacket` -> relayed across multiple BLE hops -> framed into LoRa PHY (`0xBA70` + CRC16) -> decoded by base station.
 - **Scenario 2 (CBRN Contamination & CRDT Sync):** Geiger dosimeter reads 150 $\mu\text{Sv/h}$ -> triggers acute exclusion zone -> drops CRDT hazard pin in `MapPinStore` -> synced across mesh.
 - **Scenario 3 (Subterranean RF Blackout):** Total radio jamming -> `UltrasonicModem` modulates SOS payload into 18–22 kHz AFSK acoustic bursts -> decoded via Goertzel filter.
@@ -41,6 +43,9 @@ Bastion Zero includes three dedicated multi-system end-to-end integration test s
 - **Scenario 8 (Subterranean Dark Cave Escape & Water Triage):** `ZeroLightSpatialMapper` extracts 2.5D wireframes and flags forward pitfall drop-offs in total darkness without visible light; `WaterTurbidityAnalyzer` evaluates stream sample NTU and provides microfiltration/boiling protocols.
 - **Scenario 9 (Hostile EW Drone Vectoring & Celestial Navigation):** `AcousticTriangulationEngine` isolates 42 Hz rotor blade harmonics and triangulates bearing; `CelestialCompassEngine` calculates solar ephemeris and shadow-stick alignment to detect a 75° magnetic compass spoofing distortion.
 - **Scenario 10 (Mountain Survivor Rescue & Perimeter Defense):** `SarGhostTransponder` executes safe low-duty-cycle cellular emergency bursts (+23 dBm) for airborne SAR receivers; `PerimeterDefenseCoordinator` fuses coincident acoustic gunshot and seismic tilt alerts into an instant Red Alert across squad nodes.
+- **Scenario 11 (Physical Hardware & EW Spoofing Defense with Map Snapping):** USB-C OTG identifies attached LoRa transceiver; raw GNSS stream experiences a +30 dB terrestrial AGC spike; `GnssSpoofingDetector` proves electronic warfare spoofing, flags dead reckoning fallback; `MapSnappingEngine` bounds accumulated IMU drift by orthogonally projecting trajectory to offline vector ridge paths.
+- **Scenario 12 (Dense Mesh Broadcast Suppression & Meshtastic Civilian Interop):** 5 rapid physical volume clicks fire `HardwarePanicTrigger`; `SlottedRebroadcastSuppression` suppresses redundant relay broadcasts upon hearing neighbor duplicates in dense clusters; `MeshtasticProtocolBridge` transcodes the alert into Meshtastic text packets for cross-network relay.
+- **Scenario 13 (Panicked Voice Triage, Neural Acoustic Threat & Airgap APK Beam):** Panicked casualty dictate triggers `EdgeRagSemanticRouter` with immediate TCCC tourniquet commands; `AcousticNeuralClassifier` identifies drone rotor harmonic signature; `AirgapApkBeacon` broadcasts offline local Wi-Fi hotspot pairing QR to beam `BastionZero.apk` to stranded civilians.
 
 ## Screenshots
 

@@ -15,6 +15,7 @@ Repo: `FranekJemiolo/bastion-zero`. Master constraint: **Zero cloud dependencies
 | **Phase 4** | Sensor HAL & Edge Intelligence | **Complete** | PDR dead reckoning, Butterworth structural tilt monitor, 5% battery Dead Man's Switch, FFT acoustic threat detection, GNSS anti-spoofing, UWB ranging, trauma black-box, optical PPG, LoRa PHY, ultrasonic modem. |
 | **Phase 5** | Autonomous Resilience & Field Hardening | **Complete** | `UnifiedMeshRouter` multi-transport arbitrator, `AutonomousPowerGovernor` solar coupling, `SecureEnclaveKeyManager`, `AirgapBundleSync` animated QR stream, `TacticalFieldHud` glove mode. |
 | **Phase 6** | Tactical Edge Sensor Weaponization | **Complete** | `ZeroLightSpatialMapper` wireframe navigation, `WaterTurbidityAnalyzer` optical NTU potability, `AcousticTriangulationEngine` multi-mic TDoA, `CelestialCompassEngine` unjammable nav, `SarGhostTransponder`, `PerimeterDefenseCoordinator`. |
+| **Phase 7** | Field Operational Readiness & Tactical Hardware | **Complete** | `UsbSerialHostDriver` (CDC-ACM/FTDI/CP210x/CH34x), `GnssRawMeasurementIngestor`, `OfflineVectorMapEngine`, `MapSnappingEngine`, `AcousticNeuralClassifier`, `EdgeRagSemanticRouter`, `HardwarePanicTrigger`, `MeshtasticProtocolBridge`, `SlottedRebroadcastSuppression`, `AirgapApkBeacon`. |
 
 ---
 

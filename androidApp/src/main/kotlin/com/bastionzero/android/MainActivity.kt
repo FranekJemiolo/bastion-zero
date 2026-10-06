@@ -28,6 +28,7 @@ import kotlinx.coroutines.launch
 class MainActivity : ComponentActivity() {
     private lateinit var governor: PowerGovernor
     private lateinit var meshContext: MeshContext
+    private val panicTrigger = com.bastionzero.hal.HardwarePanicTrigger()
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
@@ -63,6 +64,7 @@ class MainActivity : ComponentActivity() {
             power = governor,
             haptics = haptics,
             mesh = meshContext.router,
+            panicTrigger = panicTrigger,
         )
 
         lifecycleScope.launch {
@@ -110,6 +112,17 @@ class MainActivity : ComponentActivity() {
         return ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED &&
             ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADVERTISE) == PackageManager.PERMISSION_GRANTED &&
             ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
+    }
+
+    override fun onKeyDown(keyCode: Int, event: android.view.KeyEvent?): Boolean {
+        if (keyCode == android.view.KeyEvent.KEYCODE_VOLUME_DOWN || keyCode == android.view.KeyEvent.KEYCODE_VOLUME_UP) {
+            val triggered = panicTrigger.registerButtonPress(System.currentTimeMillis())
+            if (triggered) {
+                meshContext.router.broadcastSos(com.bastionzero.proto.SurvivalPacket.PacketType.SOS_MEDICAL, note = "PANIC_HARDWARE_TRIGGER")
+                return true
+            }
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     private fun applyDisplayPolicy(policy: PowerPolicy) {
