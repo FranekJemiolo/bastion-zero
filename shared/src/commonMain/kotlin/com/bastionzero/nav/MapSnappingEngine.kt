@@ -75,8 +75,9 @@ class MapSnappingEngine(
         b: GeoPoint2D,
     ): GeoPoint2D {
         // Convert to local Cartesian meters relative to A
+        val toRad = kotlin.math.PI / 180.0
         val metersPerLat = 111320.0
-        val metersPerLon = 111320.0 * cos(Math.toRadians(a.latitude))
+        val metersPerLon = 111320.0 * cos(a.latitude * toRad)
 
         val bx = (b.longitude - a.longitude) * metersPerLon
         val by = (b.latitude - a.latitude) * metersPerLat

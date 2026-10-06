@@ -65,6 +65,8 @@ class MainActivity : ComponentActivity() {
             haptics = haptics,
             mesh = meshContext.router,
             panicTrigger = panicTrigger,
+            usbSerialHostDriver = com.bastionzero.hal.UsbSerialHostDriver(applicationContext),
+            gnssRawIngestor = com.bastionzero.hal.GnssRawMeasurementIngestor(applicationContext),
         )
 
         lifecycleScope.launch {

@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
  * Identifies CDC-ACM, FTDI, CP210x, and CH34x survival serial hardware peripherals.
  */
 actual class UsbSerialHostDriver(
-    private val context: Context? = null,
+    private val context: Context,
 ) : UsbSerialConnection {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -40,7 +40,7 @@ actual class UsbSerialHostDriver(
     private val _receivedBytes = MutableSharedFlow<ByteArray>(extraBufferCapacity = 64)
     actual override val receivedBytes: SharedFlow<ByteArray> = _receivedBytes.asSharedFlow()
 
-    private val usbManager: UsbManager? = context?.getSystemService(Context.USB_SERVICE) as? UsbManager
+    private val usbManager: UsbManager? = context.getSystemService(Context.USB_SERVICE) as? UsbManager
     private var connection: UsbDeviceConnection? = null
     private var usbInterface: UsbInterface? = null
     private var inEndpoint: UsbEndpoint? = null

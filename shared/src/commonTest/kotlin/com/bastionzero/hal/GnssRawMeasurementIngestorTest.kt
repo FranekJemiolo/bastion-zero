@@ -1,9 +1,29 @@
 package com.bastionzero.hal
 
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+
+private class TestGnssRawStream : GnssRawStream {
+    private val _epochs = MutableSharedFlow<RawGnssEpoch>(extraBufferCapacity = 32)
+    override val epochs: SharedFlow<RawGnssEpoch> = _epochs.asSharedFlow()
+    private val _isListening = MutableStateFlow(false)
+    override val isListening: StateFlow<Boolean> = _isListening.asStateFlow()
+    var attachedDetector: GnssSpoofingDetector? = null
+
+    override fun startListening() { _isListening.value = true }
+    override fun stopListening() { _isListening.value = false }
+    override fun attachToSpoofingDetector(detector: GnssSpoofingDetector) {
+        attachedDetector = detector
+    }
+}
 
 class GnssRawMeasurementIngestorTest {
 
@@ -33,7 +53,7 @@ class GnssRawMeasurementIngestorTest {
     @Test
     fun testIngestorFeedsSpoofingDetector() {
         val detector = GnssSpoofingDetector(agcSpikeThresholdDb = 14.0f)
-        val ingestor = GnssRawMeasurementIngestor()
+        val ingestor = TestGnssRawStream()
 
         ingestor.attachToSpoofingDetector(detector)
         ingestor.startListening()

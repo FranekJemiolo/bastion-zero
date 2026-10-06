@@ -36,7 +36,7 @@ interface UsbSerialConnection {
  * - androidMain: Android UsbManager host driver supporting CDC-ACM, FTDI, CP210x, and CH34x chipsets.
  * - iosMain: Simulated / MFi serial bridge adhering to iOS sandboxing constraints.
  */
-expect class UsbSerialHostDriver() : UsbSerialConnection {
+expect class UsbSerialHostDriver : UsbSerialConnection {
     override val isConnected: StateFlow<Boolean>
     override val connectedDevice: StateFlow<UsbSerialDeviceInfo?>
     override val receivedBytes: SharedFlow<ByteArray>

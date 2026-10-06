@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
  * iOS actual implementation of [UsbSerialHostDriver].
  * Adheres to Apple iOS USB-C sandboxing constraints (no arbitrary non-MFi USB serial access).
  */
-actual class UsbSerialHostDriver() : UsbSerialConnection {
+actual class UsbSerialHostDriver : UsbSerialConnection {
 
     private val _isConnected = MutableStateFlow(false)
     actual override val isConnected: StateFlow<Boolean> = _isConnected.asStateFlow()

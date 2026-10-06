@@ -32,7 +32,7 @@ interface GnssRawStream {
  * Native Raw GNSS Measurement Ingestor.
  * Ingests low-level satellite carrier and AGC signals for Electronic Warfare & Anti-Spoofing defense.
  */
-expect class GnssRawMeasurementIngestor() : GnssRawStream {
+expect class GnssRawMeasurementIngestor : GnssRawStream {
     override val epochs: SharedFlow<RawGnssEpoch>
     override val isListening: StateFlow<Boolean>
 

@@ -173,10 +173,11 @@ class OfflineVectorMapEngine {
 
     companion object {
         fun haversineMeters(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
-            val dLat = Math.toRadians(lat2 - lat1)
-            val dLon = Math.toRadians(lon2 - lon1)
+            val toRad = kotlin.math.PI / 180.0
+            val dLat = (lat2 - lat1) * toRad
+            val dLon = (lon2 - lon1) * toRad
             val a = kotlin.math.sin(dLat / 2) * kotlin.math.sin(dLat / 2) +
-                cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) *
+                cos(lat1 * toRad) * cos(lat2 * toRad) *
                 kotlin.math.sin(dLon / 2) * kotlin.math.sin(dLon / 2)
             val c = 2 * kotlin.math.atan2(kotlin.math.sqrt(a), kotlin.math.sqrt(1 - a))
             return 6371000.0 * c

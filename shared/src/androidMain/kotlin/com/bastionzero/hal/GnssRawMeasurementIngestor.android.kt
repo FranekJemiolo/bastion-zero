@@ -22,7 +22,7 @@ import kotlinx.coroutines.launch
  * Hooks into [LocationManager.registerGnssMeasurementsCallback] to stream live AGC and clock bias.
  */
 actual class GnssRawMeasurementIngestor(
-    private val context: Context? = null,
+    private val context: Context,
 ) : GnssRawStream {
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -34,7 +34,7 @@ actual class GnssRawMeasurementIngestor(
     actual override val isListening: StateFlow<Boolean> = _isListening.asStateFlow()
 
     private val locationManager: LocationManager? =
-        context?.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+        context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
 
     private var attachedDetector: GnssSpoofingDetector? = null
     private var lastFullBiasNanos: Long = 0L

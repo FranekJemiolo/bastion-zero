@@ -85,8 +85,8 @@ class AppEnvironment(
     val meshtasticBridge: com.bastionzero.net.MeshtasticProtocolBridge = com.bastionzero.net.MeshtasticProtocolBridge(),
     val slottedSuppression: com.bastionzero.net.SlottedRebroadcastSuppression = com.bastionzero.net.SlottedRebroadcastSuppression(),
     val apkBeacon: com.bastionzero.airgap.AirgapApkBeacon = com.bastionzero.airgap.AirgapApkBeacon(),
-    val usbSerialHostDriver: com.bastionzero.hal.UsbSerialHostDriver = com.bastionzero.hal.UsbSerialHostDriver(),
-    val gnssRawIngestor: com.bastionzero.hal.GnssRawMeasurementIngestor = com.bastionzero.hal.GnssRawMeasurementIngestor(),
+    val usbSerialHostDriver: com.bastionzero.hal.UsbSerialHostDriver? = null,
+    val gnssRawIngestor: com.bastionzero.hal.GnssRawMeasurementIngestor? = null,
 )
 
 private enum class Tab(val label: String, val glyph: String) {

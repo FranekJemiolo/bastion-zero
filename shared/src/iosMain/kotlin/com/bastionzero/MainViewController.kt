@@ -42,6 +42,8 @@ fun MainViewController() = ComposeUIViewController {
             power = governor,
             haptics = haptics,
             mesh = meshContext.router,
+            usbSerialHostDriver = com.bastionzero.hal.UsbSerialHostDriver(),
+            gnssRawIngestor = com.bastionzero.hal.GnssRawMeasurementIngestor(),
         )
     }
     App(env)
